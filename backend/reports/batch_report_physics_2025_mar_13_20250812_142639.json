@@ -1,0 +1,54 @@
+{
+  "paper_id": "physics_2025_mar_13",
+  "timestamp": "2025-08-12T14:26:39.701226",
+  "total_processed": 3,
+  "successful": 0,
+  "failed": 3,
+  "success_rate": 0.0,
+  "average_consensus_score": 0,
+  "confidence_distribution": {
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0,
+    "MANUAL_REVIEW": 0
+  },
+  "validation_statistics": {
+    "deepseek_passed": 0,
+    "claude_validated": 0,
+    "manual_review": 0,
+    "validation_rate": 0.0
+  },
+  "cost_analysis": {
+    "deepseek_cost": 0.0015,
+    "claude_cost": 0.0,
+    "total_cost": 0.0015,
+    "cost_per_question": 0.0005
+  },
+  "total_estimated_marks": 0,
+  "total_max_marks": 0,
+  "estimated_percentage": 0,
+  "successful_questions": [],
+  "failed_questions": [
+    {
+      "question_id": "physics_2025_mar_13_q01",
+      "question_number": 1,
+      "file_name": "question_01_enhanced.png",
+      "status": "ERROR",
+      "error": "DeepSeek fallback error: {'error': {'message': 'Authentication Fails, Your api key: ****5741 is invalid', 'type': 'authentication_error', 'param': None, 'code': 'invalid_request_error'}}"
+    },
+    {
+      "question_id": "physics_2025_mar_13_q02",
+      "question_number": 2,
+      "file_name": "question_02_enhanced.png",
+      "status": "ERROR",
+      "error": "DeepSeek fallback error: {'error': {'message': 'Authentication Fails, Your api key: ****5741 is invalid', 'type': 'authentication_error', 'param': None, 'code': 'invalid_request_error'}}"
+    },
+    {
+      "question_id": "physics_2025_mar_13_q03",
+      "question_number": 3,
+      "file_name": "question_03_enhanced.png",
+      "status": "ERROR",
+      "error": "DeepSeek fallback error: {'error': {'message': 'Authentication Fails, Your api key: ****5741 is invalid', 'type': 'authentication_error', 'param': None, 'code': 'invalid_request_error'}}"
+    }
+  ]
+}

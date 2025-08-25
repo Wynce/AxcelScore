@@ -1,0 +1,134 @@
+{
+  "1": {
+    "question_text": "A student uses a metre ruler to measure the length of six identical table-tennis balls placed between two wooden blocks. What is the diameter of one ball?",
+    "options": {
+      "A": "4 cm",
+      "B": "5 cm",
+      "C": "6 cm",
+      "D": "8 cm"
+    },
+    "correct_answer": "A",
+    "simple_answer": "The diameter of one ball is 4 cm.",
+    "calculation_steps": [
+      "Step 1: Identify the total length of 6 balls from ruler readings: 62 cm - 38 cm = 24 cm",
+      "Step 2: Calculate diameter of one ball: 24 cm \u00f7 6 balls = 4 cm per ball",
+      "Step 3: Therefore, the diameter of one ball is 4 cm"
+    ],
+    "detailed_explanation": {
+      "why_correct": "Option A is correct because the six balls span from 38 cm to 62 cm on the ruler (total length 24 cm), so each ball has a diameter of 24 cm \u00f7 6 = 4 cm.",
+      "why_others_wrong": {
+        "B": "5 cm would give a total length of 30 cm for 6 balls, which doesn't match the 24 cm measurement",
+        "C": "6 cm would give a total length of 36 cm for 6 balls, which is too large compared to the ruler reading",
+        "D": "8 cm would give a total length of 48 cm for 6 balls, which is far too large for the measured span"
+      }
+    },
+    "topic": "Measurement and Units",
+    "difficulty": "easy",
+    "confidence_score": 0.98,
+    "auto_flagged": false,
+    "question_number": 1,
+    "saved_at": "2025-08-14T08:29:29.327867",
+    "solver_version": "Independent v1.0 - Simplified",
+    "needs_review": false,
+    "flag_reason": null
+  },
+  "2": {
+    "question_text": "A train is on a straight track. The graph shows how a quantity y varies with time. Which statements can be true? 1 The train is stationary and y represents the distance from the last station. 2 The train is moving and y represents the distance from the last station. 3 The train is stationary and y represents the speed of the train. 4 The train is moving and y represents the speed of the train.",
+    "options": {
+      "A": "1 and 2",
+      "B": "1 and 4",
+      "C": "2 and 3",
+      "D": "3 and 4"
+    },
+    "correct_answer": "B",
+    "simple_answer": "The graph shows a constant positive value, which can represent either a stationary train at fixed distance from station or a moving train at constant speed.",
+    "calculation_steps": [
+      "Step 1: Analyze the graph - y is constant and positive over time",
+      "Step 2: Consider what constant values mean for distance and speed scenarios",
+      "Step 3: Determine which combinations are physically possible"
+    ],
+    "detailed_explanation": {
+      "why_correct": "Option B is correct because statement 1 (stationary train at constant distance from station) and statement 4 (moving train at constant speed) both result in horizontal line graphs with constant positive y-values.",
+      "why_others_wrong": {
+        "A": "Statement 2 is wrong because if the train is moving, distance from station would change over time, not remain constant",
+        "C": "Statement 3 is wrong because if the train is stationary, its speed would be zero, not a positive constant value",
+        "D": "Statement 3 is wrong because stationary trains have zero speed, not constant positive speed"
+      }
+    },
+    "topic": "Motion and Forces",
+    "difficulty": "medium",
+    "confidence_score": 0.92,
+    "auto_flagged": false,
+    "question_number": 2,
+    "saved_at": "2025-08-14T10:22:56.837774",
+    "solver_version": "Independent v1.0 - Simplified",
+    "needs_review": false,
+    "flag_reason": null
+  },
+  "3": {
+    "question_text": "A vehicle sent to explore the surface of Mars has a mass of 200 kg. The acceleration of free fall on Mars is 3.7 m/s\u00b2. What is the weight of the vehicle on Mars?",
+    "options": {
+      "A": "20 N",
+      "B": "54 N",
+      "C": "740 N",
+      "D": "2000 N"
+    },
+    "correct_answer": "C",
+    "simple_answer": "The weight of the vehicle on Mars is 740 N.",
+    "calculation_steps": [
+      "Step 1: Use the weight formula: Weight = mass \u00d7 gravitational acceleration",
+      "Step 2: Substitute values: Weight = 200 kg \u00d7 3.7 m/s\u00b2",
+      "Step 3: Calculate: Weight = 740 N"
+    ],
+    "detailed_explanation": {
+      "why_correct": "Option C is correct because weight equals mass times gravitational acceleration (W = mg), so 200 kg \u00d7 3.7 m/s\u00b2 = 740 N.",
+      "why_others_wrong": {
+        "A": "20 N is far too small and would result from incorrect calculation or wrong formula",
+        "B": "54 N is too small and might result from using only part of the mass or acceleration values",
+        "D": "2000 N would be the result if Earth's gravity (\u224810 m/s\u00b2) was used instead of Mars' gravity"
+      }
+    },
+    "topic": "Forces and Motion",
+    "difficulty": "easy",
+    "confidence_score": 0.98,
+    "auto_flagged": false,
+    "question_number": 3,
+    "saved_at": "2025-08-14T10:22:43.503667",
+    "solver_version": "Independent v1.0 - Simplified",
+    "needs_review": false,
+    "flag_reason": null
+  },
+  "4": {
+    "question_text": "A student writes about mass and weight. Which statement is correct?",
+    "options": {
+      "A": "A ship which is floating has mass but no weight.",
+      "B": "Mass is a scientific word that means the same as weight.",
+      "C": "Mass is measured in newtons.",
+      "D": "The mass of an astronaut is the same on the Moon as on the Earth."
+    },
+    "correct_answer": "D",
+    "simple_answer": "Mass is an intrinsic property of matter that remains constant regardless of location, so an astronaut's mass is the same on Earth and the Moon.",
+    "calculation_steps": [
+      "Step 1: Understand that mass is the amount of matter in an object",
+      "Step 2: Recognize that mass is independent of gravitational field strength",
+      "Step 3: Conclude that mass remains constant in different locations"
+    ],
+    "detailed_explanation": {
+      "why_correct": "Option D is correct because mass is an intrinsic property of matter that does not change with location. An astronaut has the same amount of matter (mass) whether on Earth or the Moon.",
+      "why_others_wrong": {
+        "A": "A floating ship still has weight - it's just balanced by the buoyant force from the water",
+        "B": "Mass and weight are different - mass is measured in kg, weight is measured in N and depends on gravity",
+        "C": "Mass is measured in kilograms (kg), not newtons (N) - weight is measured in newtons"
+      }
+    },
+    "topic": "Forces and Motion",
+    "difficulty": "medium",
+    "confidence_score": 0.96,
+    "auto_flagged": false,
+    "question_number": 4,
+    "saved_at": "2025-08-14T13:15:57.174623",
+    "solver_version": "Independent v1.0 - Simplified",
+    "needs_review": false,
+    "flag_reason": null
+  }
+}

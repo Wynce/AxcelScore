@@ -1,0 +1,80 @@
+{
+  "app_name": "Enhanced PDF Question Extractor",
+  "exam_paper": "Cambridge IGCSE Physics Paper 13",
+  "exam_session": "May/June 2025",
+  "extraction_date": "2025-08-24T21:10:56.237294",
+  "extraction_method": "Multi-Strategy Enhanced Detection",
+  "total_questions": 40,
+  "extraction_tool": "Enhanced PDF Extractor v2.0",
+  "approach": "Multi-strategy boundary detection with smart end boundaries",
+  "web_interface_ready": true,
+  "images_location": "/Users/wynceaxcel/Apps/tutor-app/question_banks/physics_2025_may_13/images",
+  "images_folder": "images",
+  "filename": "physics_2025_may_13.json",
+  "standardized_naming": true,
+  "subject": "physics",
+  "year": "2025",
+  "month": "may",
+  "month_display": "May/June",
+  "paper_code": "13",
+  "image_quality": 2.0,
+  "enhancement_applied": true,
+  "extraction_success": true,
+  "image_replacements": [
+    {
+      "timestamp": "2025-08-24T21:18:51.197770",
+      "applied_count": 5,
+      "failed_count": 0,
+      "replacements": [
+        {
+          "question_number": 1,
+          "original_filename": "question_01_enhanced.png",
+          "backup_filename": "question_01_enhanced_backup_20250824_211851.png",
+          "new_file_size": 39412,
+          "dimensions": "1108x414",
+          "replacement_timestamp": "2025-08-24T21:18:51.139742",
+          "active_folder": "images"
+        },
+        {
+          "question_number": 3,
+          "original_filename": "question_03_enhanced.png",
+          "backup_filename": "question_03_enhanced_backup_20250824_211851.png",
+          "new_file_size": 25519,
+          "dimensions": "1062x238",
+          "replacement_timestamp": "2025-08-24T21:18:51.158002",
+          "active_folder": "images"
+        },
+        {
+          "question_number": 4,
+          "original_filename": "question_04_enhanced.png",
+          "backup_filename": "question_04_enhanced_backup_20250824_211851.png",
+          "new_file_size": 34112,
+          "dimensions": "1076x294",
+          "replacement_timestamp": "2025-08-24T21:18:51.173130",
+          "active_folder": "images"
+        },
+        {
+          "question_number": 20,
+          "original_filename": "question_20_enhanced.png",
+          "backup_filename": "question_20_enhanced_backup_20250824_211851.png",
+          "new_file_size": 37273,
+          "dimensions": "1086x458",
+          "replacement_timestamp": "2025-08-24T21:18:51.183017",
+          "active_folder": "images"
+        },
+        {
+          "question_number": 35,
+          "original_filename": "question_35_enhanced.png",
+          "backup_filename": "question_35_enhanced_backup_20250824_211851.png",
+          "new_file_size": 48367,
+          "dimensions": "1092x472",
+          "replacement_timestamp": "2025-08-24T21:18:51.196506",
+          "active_folder": "images"
+        }
+      ],
+      "failures": [],
+      "active_folder": "/Users/wynceaxcel/Apps/tutor-app/question_banks/physics_2025_may_13/images",
+      "folder_type": "images"
+    }
+  ]
+}

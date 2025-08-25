@@ -1,0 +1,396 @@
+# AI Tutor App - Product Requirements Document (PRD)
+
+## 📊 Project Overview
+
+### Purpose
+Create a modern, engaging AI tutor app frontend for Gen Alpha students (born 2010-2025) to practice physics questions. The app will be used to compare different AI models' UI/UX capabilities for educational interfaces.
+
+### Success Criteria
+- Functional quiz interface that engages Gen Alpha students
+- Responsive design optimized for mobile/tablet use
+- Complete user journey from quiz start to retest
+- Clear comparison framework for evaluating different AI model outputs
+
+---
+
+## 🎯 Target Audience
+
+### Primary Users
+- **Gen Alpha Students (ages 10-15)**
+- Learning IGCSE Physics concepts
+- Mobile-first device usage patterns
+- Expect modern, interactive interfaces
+- Short attention spans, need engaging visuals
+
+### Use Case
+- Practice physics multiple choice questions
+- Self-assessment and learning
+- Quick review of concepts with detailed explanations
+
+---
+
+## 🚨 Critical Development Requirement
+
+### **MUST PROVIDE LIVE INTERACTIVE CANVAS FIRST**
+
+**Before any code files**, create a working, interactive preview that demonstrates:
+- ✅ Fully functional quiz interface (clickable, navigable)
+- ✅ All 5 physics questions embedded and working
+- ✅ Complete user journey (start → quiz → results → review → retest)
+- ✅ Responsive design testable by resizing browser
+- ✅ All features working (navigation, scoring, explanations)
+
+**Why**: Need to test and compare UI/UX approaches across different AI models before committing to code implementation.
+
+---
+
+## 🛠️ Technical Specifications
+
+### Technology Stack
+- **Frontend Framework**: React (functional components with hooks)
+- **Styling**: Tailwind CSS for responsive design
+- **Target Devices**: Mobile-first, tablet-optimized, desktop-compatible
+- **Deployment**: Static web app (no backend required)
+
+### Browser Support
+- Mobile Safari (iOS)
+- Chrome Mobile (Android)
+- Desktop Chrome, Safari, Firefox
+- Tablet browsers (iPad, Android tablets)
+
+---
+
+## 📁 File Structure & Architecture
+
+```
+ai-tutor-app/
+├── public/
+│   ├── index.html
+│   └── question_banks/        # Dynamic question bank structure
+│       ├── physics_2024_mar_13/
+│       │   ├── images/
+│       │   ├── physics_2024_Mar_13_question_bank.json
+│       │   └── solutions.json
+│       └── physics_2025_mar_13/
+│           ├── images/
+│           ├── physics_2025_Mar_13_question_bank.json
+│           └── solutions.json
+├── src/
+│   ├── App.js                 # Main app logic & state management
+│   ├── index.js               # React entry point
+│   ├── index.css              # Global styles + Tailwind imports
+│   ├── components/
+│   │   ├── QuizContainer.js   # Main quiz wrapper
+│   │   ├── QuestionCard.js    # Individual question display
+│   │   ├── AnswerOptions.js   # Multiple choice buttons
+│   │   ├── ScoreScreen.js     # Results & scoring display
+│   │   ├── ReviewMode.js      # Answer explanations
+│   │   ├── Navigation.js      # Previous/Next buttons
+│   │   ├── ProgressBar.js     # Question progress indicator
+│   │   └── QuestionBankSelector.js  # 🆕 Question bank selection
+│   ├── services/
+│   │   └── questionService.js # 🆕 Question bank loading logic
+│   ├── hooks/
+│   │   └── useQuiz.js         # Custom quiz logic hook
+│   └── utils/
+│       └── helpers.js         # Utility functions
+```
+
+### Component Responsibilities
+- **App.js**: Overall state management, mode routing, basic layout
+- **QuizContainer.js**: Quiz flow logic, answer handling
+- **QuestionCard.js**: Question display, image rendering
+- **AnswerOptions.js**: Interactive choice buttons, selection feedback
+- **ScoreScreen.js**: Results display, celebrations, retest trigger
+- **ReviewMode.js**: Detailed explanations, step-by-step solutions
+- **QuestionBankSelector.js**: 🆕 Select exam/question bank for quiz
+- **questionService.js**: 🆕 Load questions from question_banks folder
+
+---
+
+## 📚 Question Bank System
+
+### Current Structure (Based on Your Folder)
+```
+question_banks/
+├── physics_2024_mar_13/
+│   ├── images/                # Question images
+│   ├── physics_2024_Mar_13_question_bank.json
+│   ├── solutions.json
+│   └── metadata.json
+└── physics_2025_mar_13/
+    ├── images/                # Question images  
+    ├── physics_2025_Mar_13_question_bank.json
+    ├── solutions.json
+    └── metadata.json
+```
+
+### Question Loading Logic
+```javascript
+// questionService.js functionality:
+// ✅ Scan question_banks folder for available exams
+// ✅ Load specific question bank JSON files
+// ✅ Randomly select 5 questions for quiz
+// ✅ Load corresponding images from images folder
+// ✅ Merge question data with solutions
+```
+
+### Quiz Selection Flow
+1. **App Start** → Show available question banks (physics_2024_mar_13, physics_2025_mar_13)
+2. **User Selects** → Load 5 random questions from selected bank
+3. **Quiz Begins** → Standard quiz flow with loaded questions
+4. **Future Enhancement** → Mix questions from multiple banks
+
+---
+
+## 📚 Question Data Structure
+
+### JSON Format (Required)
+```json
+{
+  "question_text": "Complete question text extracted from image word-for-word",
+  "options": {
+    "A": "Option A text exactly as shown",
+    "B": "Option B text exactly as shown", 
+    "C": "Option C text exactly as shown",
+    "D": "Option D text exactly as shown"
+  },
+  "correct_answer": "C",
+  "simple_answer": "Brief, clear answer in one sentence",
+  "calculation_steps": [
+    "Step 1: What you identify or set up",
+    "Step 2: The main calculation or reasoning",
+    "Step 3: Final result with units if applicable"
+  ],
+  "detailed_explanation": {
+    "why_correct": "Clear explanation of why the correct answer is right",
+    "why_others_wrong": {
+      "A": "Specific reason why option A is incorrect",
+      "B": "Specific reason why option B is incorrect", 
+      "D": "Specific reason why option D is incorrect"
+    }
+  },
+  "topic": "Motion and Forces",
+  "difficulty": "medium",
+  "confidence_score": 0.95,
+  "auto_flagged": false
+}
+```
+
+### Test Questions (Dynamic Loading)
+**For Initial Testing**: Load 5 random questions from `/question_banks/physics_2025_mar_13/physics_2025_Mar_13_question_bank.json`
+
+**Future Functionality**: 
+- Select from available question banks (2024, 2025)
+- Random question selection from chosen bank
+- Support for multiple exam papers
+
+---
+
+## 🎨 UI/UX Requirements
+
+### Gen Alpha Design Principles
+- **Modern & Clean**: Minimalist design with plenty of white space
+- **Vibrant but Professional**: Energetic color palette without overwhelming
+- **Gamification Elements**: Progress indicators, achievements, micro-animations
+- **Touch-Friendly**: 44px minimum touch targets, intuitive gestures
+- **Fast & Responsive**: Immediate feedback, smooth transitions
+
+### Visual Design Requirements
+- **Typography**: Gill Sans MT (primary font), 16px minimum on mobile, clear hierarchy
+- **Color Scheme** (Specified):
+  - **Primary Blue**: #0453f1 (main buttons, primary actions)
+  - **Secondary Blue**: #e5e6ea (light backgrounds, secondary elements)
+  - **Orange/Accent**: #FF6701 (highlights, call-to-action buttons)
+  - **Light Orange**: #f2e08a (success states, positive feedback)
+  - **Background**: #FFFFFF (main background)
+  - **Light Gray**: #e9f0f6 (card backgrounds, subtle sections)
+  - **Medium Gray**: #e5e6ea (borders, dividers)
+  - **Text Colors**:
+    - Primary: #000000 (main text)
+    - Secondary: #58585A (supporting text)
+- **Success States**: Green tones for correct answers (#4CAF50 suggested)
+- **Error States**: Warm red for incorrect answers (#F44336 suggested)
+- **Accessibility**: High contrast ratios, semantic markup
+- **Animation**: Subtle micro-interactions, celebration effects
+
+### Color Usage Guidelines
+- **Primary Actions**: Blue (#0453f1) - Next/Previous buttons, Submit quiz
+- **Secondary Actions**: Light blue (#e5e6ea) - Cancel, Back buttons  
+- **Accent/Highlights**: Orange (#FF6701) - Selected answers, progress indicators
+- **Success Feedback**: Light orange (#f2e08a) - Correct answer celebrations
+- **Backgrounds**: White (#FFFFFF) main, Light gray (#e9f0f6) for cards
+- **Text**: Black (#000000) primary, Gray (#58585A) secondary
+
+### Tailwind CSS Custom Configuration
+```css
+/* Add to index.css for custom color variables */
+:root {
+  --primary-blue: #0453f1;
+  --secondary-blue: #e5e6ea;
+  --accent-orange: #FF6701;
+  --light-orange: #f2e08a;
+  --background-white: #FFFFFF;
+  --background-gray: #e9f0f6;
+  --border-gray: #e5e6ea;
+  --text-primary: #000000;
+  --text-secondary: #58585A;
+  --success-green: #4CAF50;
+  --error-red: #F44336;
+}
+
+/* Custom Tailwind classes */
+.btn-primary { @apply bg-[#0453f1] text-white hover:bg-[#0341c7]; }
+.btn-secondary { @apply bg-[#e5e6ea] text-[#000000] hover:bg-[#d1d2d6]; }
+.btn-accent { @apply bg-[#FF6701] text-white hover:bg-[#e55a01]; }
+.card-bg { @apply bg-[#e9f0f6]; }
+.text-primary { @apply text-[#000000]; }
+.text-secondary { @apply text-[#58585A]; }
+```
+
+---
+
+## 🔄 User Journey & Features
+
+### Core User Flow
+1. **Welcome Screen** → Select question bank (physics_2024_mar_13 or physics_2025_mar_13)
+2. **Question Loading** → Randomly select 5 questions from chosen bank
+3. **Quiz Mode** → Answer 5 questions with navigation
+4. **Results Screen** → Score display with encouraging message
+5. **Review Mode** → Detailed explanations for each question
+6. **Retest Option** → Restart with new random selection or same questions
+
+### Required Features
+
+#### Quiz Interface
+- ✅ **Question Bank Selection** → Choose from available exam papers
+- ✅ **Dynamic Question Loading** → Load 5 random questions from selected bank
+- ✅ Display question images and text clearly (from question_banks/[exam]/images/)
+- ✅ Interactive multiple choice buttons (A, B, C, D)
+- ✅ Progress indicator ("Question 2 of 5")
+- ✅ Previous/Next navigation
+- ✅ Visual feedback for selected answers
+
+#### Scoring System
+- ✅ Calculate percentage score
+- ✅ Animated score reveal
+- ✅ Performance breakdown (correct vs incorrect)
+- ✅ Encouraging messages regardless of score
+- ✅ Prominent "Try Again" button
+
+#### Answer Review
+- ✅ Show student's answer vs correct answer
+- ✅ Display simple explanation
+- ✅ Show detailed step-by-step breakdown
+- ✅ Explain why other options are wrong
+- ✅ Easy navigation between questions in review
+
+#### Mobile Optimizations
+- ✅ Single column layout
+- ✅ Bottom navigation for primary actions
+- ✅ Collapsible sections for detailed explanations
+- ✅ Optimized image sizing for all screens
+- ✅ Touch-friendly interactions
+
+---
+
+## 📊 Success Metrics & Evaluation
+
+### UI/UX Evaluation Criteria
+1. **Clarity**: How easily can students understand the interface?
+2. **Engagement**: Does the design motivate continued use?
+3. **Efficiency**: How quickly can students complete tasks?
+4. **Accessibility**: Is it usable by students with different abilities?
+5. **Mobile Experience**: Does it work seamlessly on phones/tablets?
+
+### Testing Scenarios
+1. **Complete Quiz Flow** - Answer all 5 questions and see results
+2. **Navigation Testing** - Jump between questions, change answers
+3. **Mobile Simulation** - Resize to phone width, test interactions
+4. **Review Mode** - Check explanations and step-by-step solutions
+5. **Retest Feature** - Restart quiz and ensure proper reset
+
+---
+
+## 🚀 Development Strategy
+
+### Phase 1: Claude Implementation (Functional Foundation)
+**Focus**: Get complete quiz functionality working
+- ✅ All quiz logic implemented
+- ✅ Basic clean UI with Tailwind defaults
+- ✅ Responsive layout working
+- ✅ All features functional
+
+### Phase 2: AI Model Comparison (UI Enhancement)
+**Focus**: Improve specific UI components
+- 🎨 Enhanced button interactions (AnswerOptions.js)
+- 🎨 Engaging score animations (ScoreScreen.js)
+- 🎨 Improved question layout (QuestionCard.js)
+- 🎨 Custom theming (index.css)
+- 🎨 Mobile-optimized interactions
+
+---
+
+## 📋 Deliverables
+
+### Required Outputs
+1. **Live Interactive Preview** (immediate testing)
+2. **Complete React Application** (functional quiz interface)
+3. **Responsive Design** (all device sizes)
+4. **Embedded Test Data** (5 physics questions working)
+5. **Modern UI Components** (reusable, well-designed)
+
+### Quality Standards
+- Zero broken functionality
+- Smooth animations and transitions
+- Professional code organization
+- Mobile-first responsive design
+- Engaging user experience for Gen Alpha
+
+---
+
+## 🎯 Key Success Factors
+
+### Must-Have Features
+- ✅ All 5 questions display and function correctly
+- ✅ Complete quiz → results → review → retest flow
+- ✅ Mobile responsive (works on phones/tablets)
+- ✅ Visual feedback for all interactions
+- ✅ Professional, engaging design suitable for students
+
+### Nice-to-Have Enhancements
+- 🎯 Subtle animations and micro-interactions
+- 🎯 Celebration effects for good scores
+- 🎯 Swipe gestures for mobile navigation
+- 🎯 Progress saving for incomplete sessions
+- 🎯 Advanced accessibility features
+
+---
+
+## 💬 Implementation Notes
+
+- Embed all 5 question images directly in the app
+- Focus on Gen Alpha preferences (modern, fast, visual)
+- Prioritize mobile experience as primary platform
+- Ensure app feels fresh, not like traditional educational software
+- Create production-ready code that showcases modern development practices
+
+---
+
+**Ready to begin development? Start with the live interactive canvas for immediate testing and evaluation.**
+
+## 🎯 Development Priority Notes
+
+### Phase 1 Focus (Claude Implementation)
+1. **Question Bank Integration**: Load questions from `/question_banks/physics_2025_mar_13/`
+2. **Dynamic Image Loading**: Use images from corresponding `/images/` folder
+3. **Random Selection**: Pick 5 random questions per quiz session
+4. **Future-Ready**: Structure code to easily add more question banks
+
+### Question Bank JSON Structure Expected
+Based on your folder structure, the app should work with your existing:
+- `physics_2025_Mar_13_question_bank.json` 
+- `solutions.json`
+- Images in `/images/` folder
+
+The app will merge question data with solutions and randomly select 5 for each quiz session.

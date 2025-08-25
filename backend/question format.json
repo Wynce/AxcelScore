@@ -1,0 +1,26 @@
+{
+  // Core Question Data
+  "question_text": "Complete question text from image",
+  "options": {"A": "...", "B": "...", "C": "...", "D": "..."},
+  "correct_answer": "C",
+  "explanation": "Simple yet clear step-by-step solution with calculations", // Simplified - no units, calculation steps, assessment notes, or learning objectives
+  
+  // Educational Metadata - Following Cambridge IGCSE Physics 0625 Syllabus Structure
+  "syllabus_topic": "Motion, forces and energy", // Main topics: 1. Motion, forces and energy; 2. Thermal physics; 3. Waves; 4. Electricity and magnetism; 5. Nuclear physics; 6. Space physics
+  "sub_topic": "Forces", // Sub-topics from syllabus structure (e.g., Physical quantities and measurement techniques, Motion, Mass and weight, Density, Forces, Momentum, Energy work and power, Pressure)
+  "detailed_topic": "Newton's second law applications", // Specific focus area
+  "keywords": ["force", "acceleration", "mass", "newton"], // Key terms for searchability
+  "difficulty_level": "medium", // easy, medium, hard
+  "cognitive_level": "application", // knowledge, comprehension, application, analysis, synthesis, evaluation
+  
+  // Physics-Specific Metadata
+  "formula_used": ["F = ma"], // Key formulas referenced in solution
+  "physics_concepts": ["Newton's second law", "net force"], // Core physics principles
+  
+  // Quality Control
+  "confidence_score": 0.95, // AI confidence in question accuracy (0-1)
+  "auto_flagged": false, // Automatic flagging for potential issues
+  "needs_review": false // Manual review requirement flag
+  
+ 
+}

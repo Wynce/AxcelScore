@@ -1,0 +1,16 @@
+{
+  "name": "axcelscore",
+  "version": "1.0.0",
+  "description": "Multi-user PDF question extractor for Cambridge IGCSE papers",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod",
+    "build": "echo 'Building...'",
+    "test": "python -m pytest tests/"
+  },
+  "keywords": ["education", "pdf", "extraction", "igcse", "cambridge"],
+  "author": "Your Name",
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}

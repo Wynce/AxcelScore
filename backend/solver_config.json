@@ -1,0 +1,43 @@
+{
+  "deepseek": {
+    "api_key": "",
+    "model": "deepseek-vl-7b-chat",
+    "fallback_model": "deepseek-chat",
+    "max_tokens": 2000,
+    "temperature": 0.1
+  },
+  "claude": {
+    "api_key": "${ANTHROPIC_API_KEY}",
+    "model": "claude-3-sonnet-20240229",
+    "max_tokens": 2000,
+    "temperature": 0.1
+  },
+  "openai": {
+    "api_key": "",
+    "model": "gpt-4-vision-preview",
+    "max_tokens": 2000,
+    "temperature": 0.1
+  },
+  "gemini": {
+    "api_key": "",
+    "model": "gemini-pro-vision"
+  },
+  "paths": {
+    "question_bank_base": "../question_banks",
+    "default_paper": "physics_2025_mar_13",
+    "uploads_dir": "uploads"
+  },
+  "processing": {
+    "max_concurrent": 3,
+    "retry_attempts": 2,
+    "timeout_seconds": 60
+  },
+  "validation": {
+    "primary_model": "deepseek",
+    "validation_model": "claude",
+    "confidence_threshold": 0.92,
+    "claude_validation_threshold": 0.92,
+    "high_confidence_threshold": 0.95,
+    "manual_review_threshold": 0.92
+  }
+}

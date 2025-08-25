@@ -1,0 +1,15 @@
+# Core dependencies
+flask==2.3.3
+PyMuPDF==1.23.8
+Pillow==10.0.1
+
+# Cloud services
+boto3==1.34.0
+requests==2.31.0
+
+# Database
+supabase==1.0.3
+
+# Development
+python-dotenv==1.0.0
+flask-cors==4.0.0

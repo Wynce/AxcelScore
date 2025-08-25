@@ -1,0 +1,23 @@
+{
+  "app_name": "Enhanced PDF Question Extractor",
+  "exam_paper": "Cambridge IGCSE Physics Paper 13",
+  "exam_session": "October/November 2023",
+  "extraction_date": "2025-08-25T21:15:49.385845",
+  "extraction_method": "Multi-Strategy Enhanced Detection",
+  "total_questions": 40,
+  "extraction_tool": "Enhanced PDF Extractor v2.0",
+  "approach": "Multi-strategy boundary detection with smart end boundaries",
+  "web_interface_ready": true,
+  "images_location": "/Users/wynceaxcel/Apps/axcelscore/question_banks/physics_2023_oct_13/images",
+  "images_folder": "images",
+  "filename": "physics_2023_oct_13.json",
+  "standardized_naming": true,
+  "subject": "physics",
+  "year": "2023",
+  "month": "oct",
+  "month_display": "October/November",
+  "paper_code": "13",
+  "image_quality": 2.0,
+  "enhancement_applied": true,
+  "extraction_success": true
+}
