@@ -66,8 +66,8 @@ class ModuleManager:
         extractor_paths = [
         BASE_DIR / "extractor.py",
         Path.cwd() / "extractor.py",
-        TUTOR_APP_ROOT / "extractor.py",  # ADD THIS LINE
-        Path("/Users/wynceaxcel/Apps/axcelscore/extractor.py")  # ADD THIS LINE
+        TUTOR_APP_ROOT / "extractor.py",
+        Path("/Users/wynceaxcel/Apps/axcelscore/extractor.py")
         ]
         
         for path in extractor_paths:
@@ -99,12 +99,12 @@ class ModuleManager:
             
             print(f"DEBUG: Paper folder: {paper_folder_path}")
             
-            # UPDATED: Add extractor path to Python path for direct import
+            # Add extractor path to Python path for direct import
             extractor_parent = self.module_status['extractor']['path'].parent
             if str(extractor_parent) not in sys.path:
                 sys.path.insert(0, str(extractor_parent))
             
-            # UPDATED: Import the correct class name
+            # Import the correct class name
             print("DEBUG: Importing EnhancedPDFExtractor...")
             try:
                 # Clear any cached imports to ensure fresh import
@@ -123,12 +123,12 @@ class ModuleManager:
             print(f"DEBUG: Copying PDF from {pdf_path} to {pdf_dest}")
             shutil.copy2(pdf_path, pdf_dest)
             
-            # UPDATED: Initialize extractor with correct base_dir parameter
+            # Initialize extractor with correct base_dir parameter
             print("DEBUG: Initializing EnhancedPDFExtractor...")
             extractor = EnhancedPDFExtractor(base_dir=str(paper_folder_path))
             print("DEBUG: EnhancedPDFExtractor initialized successfully")
             
-            # UPDATED: Run extraction using the correct method name
+            # Run extraction using the correct method name
             print("DEBUG: Starting extraction using extract_questions_for_web_interface...")
             result = extractor.extract_questions_for_web_interface(
                 pdf_filename="exam.pdf",
@@ -142,20 +142,20 @@ class ModuleManager:
             print(f"DEBUG: Result type: {type(result)}")
             print(f"DEBUG: Result is None: {result is None}")
             
-            # UPDATED: Proper result validation
+            # Proper result validation
             if result and isinstance(result, dict) and result.get('success'):
                 print(f"DEBUG: Valid result received with keys: {list(result.keys())}")
                 
-                # UPDATED: Count extracted images with standardized folder priority
+                # Count extracted images with standardized folder priority
                 image_files = []
                 
-                # UPDATED: Check images folder FIRST (new standard)
+                # Check images folder FIRST (new standard)
                 images_folder = paper_folder_path / "images"
                 if images_folder.exists():
                     image_files.extend(list(images_folder.glob("question_*_enhanced.png")))
                     print(f"DEBUG: Found {len(image_files)} images in images folder (primary)")
                 
-                # UPDATED: Check extracted_images folder as FALLBACK only if no images found
+                # Check extracted_images folder as FALLBACK only if no images found
                 if not image_files:
                     extracted_images_folder = paper_folder_path / "extracted_images"
                     if extracted_images_folder.exists():
@@ -171,7 +171,7 @@ class ModuleManager:
                     sample_images = [img.name for img in image_files[:3]]
                     print(f"IMAGES: {sample_images}")
                 
-                # UPDATED: Return the correct images folder path
+                # Return the correct images folder path
                 active_images_folder = images_folder if images_folder.exists() else (extracted_images_folder if extracted_images_folder.exists() else images_folder)
                 
                 return {
@@ -208,7 +208,7 @@ module_manager = ModuleManager()
 # Register blueprints
 app.register_blueprint(review_manager.create_blueprint())
 
-# SIMPLE AI SOLVER MANAGER - DIRECT INTEGRATION (NO SEPARATE FILE NEEDED)
+# SIMPLE AI SOLVER MANAGER - DIRECT INTEGRATION
 class SimpleAISolverManager:
     """Simple AI Solver Manager - returns JSON responses"""
     
@@ -225,19 +225,19 @@ class SimpleAISolverManager:
                     "error": f"Paper folder not found: {paper_folder_path}"
                 }
             
-            # UPDATED: Check with standardized folder priority (images first, extracted_images fallback)
+            # Check with standardized folder priority (images first, extracted_images fallback)
             images_folder = paper_path / "images"
             extracted_images_folder = paper_path / "extracted_images"
             
             image_files = []
             images_dir = None
             
-            # UPDATED: Check images folder FIRST (primary)
+            # Check images folder FIRST (primary)
             if images_folder.exists():
                 image_files = list(images_folder.glob("question_*_enhanced.png"))
                 images_dir = images_folder
                 print(f"📁 Found images in: {images_folder}")
-            # UPDATED: Check extracted_images folder as FALLBACK
+            # Check extracted_images folder as FALLBACK
             elif extracted_images_folder.exists():
                 image_files = list(extracted_images_folder.glob("question_*_enhanced.png"))
                 images_dir = extracted_images_folder
@@ -342,9 +342,8 @@ class SimpleAISolverManager:
             '''
             question_cards.append(card_html)
         
-        # Simple HTML interface with all functionality
-        html_content = f'''
-<!DOCTYPE html>
+        # Create HTML content using triple quotes instead of f-string to avoid brace conflicts
+        html_template = """<!DOCTYPE html>
 <html>
 <head>
     <title>🤖 AI Solver - {paper_name}</title>
@@ -373,13 +372,13 @@ class SimpleAISolverManager:
     <div class="container">
         <div class="header">
             <h1>🤖 AI Solver Interface</h1>
-            <p>{metadata.get('subject', 'Physics')} {metadata.get('year', '2024')} {metadata.get('month', 'Mar')} Paper {metadata.get('paper_code', '13')}</p>
-            <p>📊 {len(image_files)} Questions Found</p>
+            <p>{subject} {year} {month} Paper {paper_code}</p>
+            <p>📊 {question_count} Questions Found</p>
         </div>
         
         <div class="stats">
             <div class="stat-card">
-                <h3 id="total-questions">{len(image_files)}</h3>
+                <h3 id="total-questions">{question_count}</h3>
                 <p>Total Questions</p>
             </div>
             <div class="stat-card">
@@ -404,7 +403,7 @@ class SimpleAISolverManager:
         </div>
         
         <div class="questions-grid">
-            {''.join(question_cards)}
+            {question_cards}
         </div>
     </div>
     
@@ -418,18 +417,7 @@ class SimpleAISolverManager:
         const PROMPT = `Analyze this Cambridge IGCSE Physics question and provide a complete solution in JSON format.
 
 Return ONLY valid JSON in this exact structure:
-{{
-  "correct_answer": "A/B/C/D or calculated value",
-  "simple_answer": "Brief clear explanation",
-  "calculation_steps": ["Step 1: Identify given values", "Step 2: Apply formula", "Step 3: Calculate result"],
-  "detailed_explanation": {{
-    "why_correct": "Detailed explanation of the correct approach and physics concepts",
-    "why_others_wrong": {{"A": "Why option A is incorrect", "B": "Why option B is incorrect"}}
-  }},
-  "topic": "Physics topic (e.g., Motion and Forces)",
-  "difficulty": "easy/medium/hard",
-  "confidence_score": 0.95
-}}
+{prompt_structure}
 
 Important:
 - Be precise with calculations and units
@@ -437,8 +425,8 @@ Important:
 - For MCQ, explain why each wrong option is incorrect
 - Confidence score should be between 0.0 and 1.0`;
 
-        let solutions = {{}};
-        let stats = {{ total: {len(image_files)}, solved: 0, flagged: 0 }};
+        let solutions = {empty_object};
+        let stats = {stats_object};
         
         function getPrompt(questionNumber) {{
             navigator.clipboard.writeText(PROMPT).then(() => {{
@@ -454,10 +442,9 @@ Important:
                 allPrompts += `=== QUESTION ${{i}} ===\\n${{PROMPT}}\\n\\n`;
             }}
             navigator.clipboard.writeText(allPrompts).then(() => {{
-                alert(`📋 All {len(image_files)} prompts copied to clipboard!\\n\\nEach prompt is labeled with question number.`);
+                alert(`📋 All {question_count} prompts copied to clipboard!\\n\\nEach prompt is labeled with question number.`);
             }}).catch(() => {{
                 console.error('Clipboard failed');
-                // Fallback: show in new window
                 const newWindow = window.open('', '_blank');
                 newWindow.document.write(`<pre>${{allPrompts}}</pre>`);
             }});
@@ -494,7 +481,6 @@ Important:
             try {{
                 const parsed = JSON.parse(solution);
                 
-                // Validate required fields
                 const required = ['correct_answer', 'simple_answer', 'confidence_score'];
                 const missing = required.filter(field => !(field in parsed));
                 if (missing.length > 0) {{
@@ -557,18 +543,7 @@ Important:
                 return;
             }}
             
-            const exportData = {{
-                paper_name: "{paper_name}",
-                metadata: {json.dumps(metadata)},
-                solutions: solutions,
-                statistics: {{
-                    completion_rate: Math.round((Object.keys(solutions).length / stats.total) * 100),
-                    average_confidence: Object.keys(solutions).length > 0 ? 
-                        Math.round((Object.values(solutions).reduce((sum, s) => sum + s.confidence_score, 0) / Object.keys(solutions).length) * 100) : 0,
-                    flagged_count: Object.values(solutions).filter(s => s.confidence_score < 0.85).length
-                }},
-                export_timestamp: new Date().toISOString()
-            }};
+            const exportData = {export_data_structure};
             
             const blob = new Blob([JSON.stringify(exportData, null, 2)], {{type: 'application/json'}});
             const url = URL.createObjectURL(blob);
@@ -620,7 +595,6 @@ Tips:
 • Review flagged solutions carefully`);
         }}
         
-        // Close modal on outside click
         window.onclick = function(event) {{
             const modal = document.getElementById('imageModal');
             if (event.target === modal) {{
@@ -628,17 +602,61 @@ Tips:
             }}
         }}
         
-        console.log('🤖 AI Solver Interface ready with {len(image_files)} questions');
+        console.log('🤖 AI Solver Interface ready with {question_count} questions');
     </script>
 </body>
-</html>
-        '''
+</html>"""
+        
+        # Format the template with safe values
+        prompt_structure = '''{
+  "correct_answer": "A/B/C/D or calculated value",
+  "simple_answer": "Brief clear explanation",
+  "calculation_steps": ["Step 1: Identify given values", "Step 2: Apply formula", "Step 3: Calculate result"],
+  "detailed_explanation": {
+    "why_correct": "Detailed explanation of the correct approach and physics concepts",
+    "why_others_wrong": {"A": "Why option A is incorrect", "B": "Why option B is incorrect"}
+  },
+  "topic": "Physics topic (e.g., Motion and Forces)",
+  "difficulty": "easy/medium/hard",
+  "confidence_score": 0.95
+}'''
+        
+        empty_object = "{}"
+        stats_object = f"{{ total: {len(image_files)}, solved: 0, flagged: 0 }}"
+        export_data_structure = '''{
+                paper_name: "''' + paper_name + '''",
+                metadata: ''' + json.dumps(metadata) + ''',
+                solutions: solutions,
+                statistics: {
+                    completion_rate: Math.round((Object.keys(solutions).length / stats.total) * 100),
+                    average_confidence: Object.keys(solutions).length > 0 ? 
+                        Math.round((Object.values(solutions).reduce((sum, s) => sum + s.confidence_score, 0) / Object.keys(solutions).length) * 100) : 0,
+                    flagged_count: Object.values(solutions).filter(s => s.confidence_score < 0.85).length
+                },
+                export_timestamp: new Date().toISOString()
+            }'''
+        
+        # Replace placeholders
+        html_content = html_template.format(
+            paper_name=paper_name,
+            subject=metadata.get('subject', 'Physics'),
+            year=metadata.get('year', '2024'),
+            month=metadata.get('month', 'Mar'),
+            paper_code=metadata.get('paper_code', '13'),
+            question_count=len(image_files),
+            question_cards=''.join(question_cards),
+            prompt_structure=prompt_structure,
+            empty_object=empty_object,
+            stats_object=stats_object,
+            export_data_structure=export_data_structure
+        )
+        
         return html_content
 
 # Initialize AI Solver Manager
 ai_solver_manager = SimpleAISolverManager()
 
-# FIXED AI SOLVER ROUTES - RETURN JSON (REPLACING BLUEPRINT)
+# AI SOLVER ROUTES
 @app.route('/api/ai-solver/initialize', methods=['POST'])
 def initialize_ai_solver():
     """Initialize AI Solver - RETURNS JSON"""
@@ -660,7 +678,6 @@ def initialize_ai_solver():
                 "error": f"Paper folder not found: {paper_folder}"
             }), 404
         
-        # Initialize solver and get JSON response
         result = ai_solver_manager.initialize_solver(str(paper_folder_path))
         
         if result["success"]:
@@ -683,12 +700,10 @@ def serve_ai_solver_interface(paper_folder):
         interface_path = paper_folder_path / "ai_solver_interface.html"
         
         if not interface_path.exists():
-            # Generate interface if it doesn't exist
             result = ai_solver_manager.initialize_solver(str(paper_folder_path))
             if not result["success"]:
                 return f"Failed to generate AI solver interface: {result['error']}", 500
         
-        # Serve the HTML file
         with open(interface_path, 'r', encoding='utf-8') as f:
             html_content = f.read()
         
@@ -703,19 +718,15 @@ def create_cache_busted_response(image_path):
     try:
         response = make_response(send_file(str(image_path)))
         
-        # Generate strong ETag based on file modification time and size
         stat = image_path.stat()
         etag_data = f"{stat.st_mtime}-{stat.st_size}"
         etag = hashlib.md5(etag_data.encode()).hexdigest()
         
-        # Aggressive cache-busting headers
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
         response.headers['ETag'] = etag
         response.headers['Last-Modified'] = datetime.fromtimestamp(stat.st_mtime).strftime('%a, %d %b %Y %H:%M:%S GMT')
-        
-        # Add custom header for debugging
         response.headers['X-Image-Cache-Bust'] = str(int(time.time() * 1000))
         
         return response
@@ -724,17 +735,16 @@ def create_cache_busted_response(image_path):
         print(f"❌ Error creating cache-busted response: {e}")
         abort(500)
 
-# Enhanced HTML template with Upload, Extract, Review, Solve workflow - CORRECT ORDER
-HTML_TEMPLATE = f'''
-<!DOCTYPE html>
+# Enhanced HTML template with fixed f-string syntax
+HTML_TEMPLATE = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🤖 AI Tutor - Upload, Extract, Review & Solve</title>
     <style>
-        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -742,8 +752,8 @@ HTML_TEMPLATE = f'''
             align-items: center;
             justify-content: center;
             padding: 20px;
-        }}
-        .container {{
+        }
+        .container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
@@ -753,19 +763,19 @@ HTML_TEMPLATE = f'''
             max-height: 90vh;
             display: flex;
             flex-direction: column;
-        }}
-        .header {{
+        }
+        .header {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             padding: 2rem;
             text-align: center;
-        }}
-        .nav-tabs {{
+        }
+        .nav-tabs {
             display: flex;
             background: #f8f9fa;
             border-bottom: 1px solid #dee2e6;
-        }}
-        .nav-tab {{
+        }
+        .nav-tab {
             flex: 1;
             padding: 1rem;
             text-align: center;
@@ -775,25 +785,25 @@ HTML_TEMPLATE = f'''
             font-weight: 600;
             transition: all 0.3s;
             font-size: 14px;
-        }}
-        .nav-tab.active {{
+        }
+        .nav-tab.active {
             background: white;
             color: #4facfe;
             border-bottom: 3px solid #4facfe;
-        }}
-        .nav-tab:disabled {{
+        }
+        .nav-tab:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }}
-        .tab-content {{ 
+        }
+        .tab-content { 
             padding: 2rem; 
             flex: 1;
             overflow-y: auto;
             min-height: 400px;
-        }}
-        .tab-pane {{ display: none; }}
-        .tab-pane.active {{ display: block; }}
-        .upload-area {{
+        }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+        .upload-area {
             border: 3px dashed #4facfe;
             border-radius: 15px;
             padding: 3rem;
@@ -802,13 +812,13 @@ HTML_TEMPLATE = f'''
             cursor: pointer;
             transition: all 0.3s;
             background: #f8f9ff;
-        }}
-        .upload-area:hover {{ background: #e6f3ff; border-color: #2196F3; }}
-        .upload-area.success {{
+        }
+        .upload-area:hover { background: #e6f3ff; border-color: #2196F3; }
+        .upload-area.success {
             border-color: #28a745;
             background: #f0fff0;
-        }}
-        .btn {{
+        }
+        .btn {
             padding: 0.75rem 1.5rem;
             border: none;
             border-radius: 8px;
@@ -820,32 +830,32 @@ HTML_TEMPLATE = f'''
             margin: 0.5rem;
             text-decoration: none;
             display: inline-block;
-        }}
-        .btn:hover {{ transform: translateY(-2px); }}
-        .btn:disabled {{ opacity: 0.6; cursor: not-allowed; transform: none; }}
-        .btn.success {{ background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }}
-        .btn.danger {{ background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); }}
-        .btn.secondary {{ background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); }}
-        .btn.enhanced {{ background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); }}
-        .alert {{
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn.success { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .btn.danger { background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); }
+        .btn.secondary { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); }
+        .btn.enhanced { background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); }
+        .alert {
             padding: 1rem;
             border-radius: 8px;
             margin: 1rem 0;
             font-weight: 500;
-        }}
-        .alert-success {{ background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }}
-        .alert-error {{ background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }}
-        .alert-info {{ background: #cce7ff; color: #0c5460; border: 1px solid #bee5eb; }}
-        .alert-warning {{ background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }}
-        .progress {{
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-info { background: #cce7ff; color: #0c5460; border: 1px solid #bee5eb; }
+        .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .progress {
             width: 100%;
             height: 24px;
             background: #e9ecef;
             border-radius: 12px;
             overflow: hidden;
             margin: 1rem 0;
-        }}
-        .progress-bar {{
+        }
+        .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, #4facfe, #00f2fe);
             transition: width 0.5s ease;
@@ -855,9 +865,9 @@ HTML_TEMPLATE = f'''
             color: white;
             font-weight: bold;
             font-size: 12px;
-        }}
-        .hidden {{ display: none !important; }}
-        .spinner {{
+        }
+        .hidden { display: none !important; }
+        .spinner {
             width: 20px;
             height: 20px;
             border: 2px solid #ffffff;
@@ -866,98 +876,98 @@ HTML_TEMPLATE = f'''
             animation: spin 1s linear infinite;
             display: inline-block;
             margin-right: 10px;
-        }}
-        @keyframes spin {{
-            0% {{ transform: rotate(0deg); }}
-            100% {{ transform: rotate(360deg); }}
-        }}
-        .file-info {{
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .file-info {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 1rem;
             margin: 1rem 0;
-        }}
-        .results-grid {{
+        }
+        .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
-        }}
-        .result-card {{
+        }
+        .result-card {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 1rem;
-        }}
-        .question-grid {{
+        }
+        .question-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
-        }}
-        .question-card {{
+        }
+        .question-card {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 1rem;
             text-align: center;
-        }}
-        .question-card img {{
+        }
+        .question-card img {
             max-width: 100%;
             height: auto;
             border-radius: 4px;
             margin-bottom: 1rem;
-        }}
-        .question-actions {{
+        }
+        .question-actions {
             display: flex;
             gap: 0.5rem;
             justify-content: center;
             flex-wrap: wrap;
-        }}
-        .btn-small {{
+        }
+        .btn-small {
             padding: 0.5rem 1rem;
             font-size: 12px;
-        }}
-        .status-ready {{
+        }
+        .status-ready {
             color: #28a745;
             font-weight: bold;
-        }}
-        .status-pending {{
+        }
+        .status-pending {
             color: #ffc107;
             font-weight: bold;
-        }}
-        .status-error {{
+        }
+        .status-error {
             color: #dc3545;
             font-weight: bold;
-        }}
-        .solve-features {{
+        }
+        .solve-features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
             margin: 1.5rem 0;
-        }}
-        .feature-card {{
+        }
+        .feature-card {
             background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);
             border: 1px solid #4facfe;
             border-radius: 10px;
             padding: 1.5rem;
             text-align: center;
-        }}
-        .feature-icon {{
+        }
+        .feature-icon {
             font-size: 2rem;
             margin-bottom: 1rem;
-        }}
-        .solver-controls {{
+        }
+        .solver-controls {
             display: flex;
             gap: 1rem;
             margin: 2rem 0;
             flex-wrap: wrap;
             justify-content: center;
-        }}
+        }
         
         /* Review Tab Specific Styles */
-        {get_review_css()}
+        ''' + get_review_css() + '''
     </style>
 </head>
 <body>
@@ -970,7 +980,7 @@ HTML_TEMPLATE = f'''
         <div class="nav-tabs">
             <button id="upload-tab-btn" class="nav-tab active" onclick="showTab('upload')">📤 Upload</button>
             <button id="extract-tab-btn" class="nav-tab" onclick="showTab('extract')" disabled>⚙️ Extract</button>
-            <button id="review-tab-btn" class="nav-tab" onclick="showTab('review')" disabled>🔍 Review</button>
+            <button id="review-tab-btn" class="nav-tab" onclick="showTab('review')" disabled>📝 Review</button>
             <button id="solve-tab-btn" class="nav-tab" onclick="showTab('solve')" disabled>🤖 Solve</button>
         </div>
 
@@ -1093,7 +1103,7 @@ HTML_TEMPLATE = f'''
                 </button>
 
                 <div id="extractProgress" class="hidden">
-                    <h4>🔄 Extraction in Progress</h4>
+                    <h4>📄 Extraction in Progress</h4>
                     <div class="progress">
                         <div id="extractProgressBar" class="progress-bar" style="width: 0%">0%</div>
                     </div>
@@ -1103,7 +1113,7 @@ HTML_TEMPLATE = f'''
                 <div id="extractResults" class="hidden"></div>
             </div>
 
-            {create_review_html_tab()}
+            ''' + create_review_html_tab() + '''
 
             <!-- Solve Tab -->
             <div class="tab-pane" id="solve-tab">
@@ -1159,7 +1169,7 @@ HTML_TEMPLATE = f'''
                 </div>
 
                 <div id="solverProgress" class="hidden">
-                    <h4>🔄 Initializing Enhanced Solver</h4>
+                    <h4>📄 Initializing Enhanced Solver</h4>
                     <div class="progress">
                         <div id="solverProgressBar" class="progress-bar" style="width: 0%">0%</div>
                     </div>
@@ -1173,48 +1183,48 @@ HTML_TEMPLATE = f'''
         let selectedFile = null;
         let extractionComplete = false;
         let questionsExtracted = 0;
-        let examMetadata = {{}};
+        let examMetadata = {};
         let currentPaperFolder = null;
 
         // Review Tab Variables
         let currentImages = [];
-        let pendingReplacements = {{}};
+        let pendingReplacements = {};
 
         // Tab switching with auto-loading for review tab
-        function showTab(tabName) {{
-            document.querySelectorAll('.tab-pane').forEach(pane => {{
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-pane').forEach(pane => {
                 pane.classList.remove('active');
-            }});
-            document.querySelectorAll('.nav-tab').forEach(tab => {{
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
-            }});
+            });
             document.getElementById(tabName + '-tab').classList.add('active');
             document.getElementById(tabName + '-tab-btn').classList.add('active');
             
             // Auto-load images when switching to review tab (if not already loaded)
-            if (tabName === 'review' && currentPaperFolder) {{
+            if (tabName === 'review' && currentPaperFolder) {
                 const galleryDiv = document.getElementById('imageGallery');
                 // Only load if gallery is hidden (not already loaded)
-                if (galleryDiv.classList.contains('hidden')) {{
+                if (galleryDiv.classList.contains('hidden')) {
                     setTimeout(() => autoLoadImagesForReview(), 500);
-                }}
-            }}
-        }}
+                }
+            }
+        }
 
         // File selection handler
-        document.getElementById('fileInput').addEventListener('change', function(e) {{
+        document.getElementById('fileInput').addEventListener('change', function(e) {
             selectedFile = e.target.files[0];
             
-            if (selectedFile) {{
+            if (selectedFile) {
                 const fileInfo = document.getElementById('file-info');
                 const fileDetails = document.getElementById('file-details');
                 const uploadArea = document.getElementById('upload-area');
                 
                 fileDetails.innerHTML = `
-                    <p><strong>Name:</strong> ${{selectedFile.name}}</p>
-                    <p><strong>Size:</strong> ${{(selectedFile.size / (1024*1024)).toFixed(2)}} MB</p>
-                    <p><strong>Type:</strong> ${{selectedFile.type}}</p>
-                    <p><strong>Last Modified:</strong> ${{new Date(selectedFile.lastModified).toLocaleString()}}</p>
+                    <p><strong>Name:</strong> ${selectedFile.name}</p>
+                    <p><strong>Size:</strong> ${(selectedFile.size / (1024*1024)).toFixed(2)} MB</p>
+                    <p><strong>Type:</strong> ${selectedFile.type}</p>
+                    <p><strong>Last Modified:</strong> ${new Date(selectedFile.lastModified).toLocaleString()}</p>
                 `;
                 fileInfo.classList.remove('hidden');
                 
@@ -1222,79 +1232,79 @@ HTML_TEMPLATE = f'''
                 uploadArea.innerHTML = `
                     <div style="font-size: 2.5rem; margin-bottom: 1rem; color: #28a745;">✅</div>
                     <h3 style="color: #28a745;">File Ready for Upload</h3>
-                    <p style="color: #6c757d; margin-top: 1rem;"><strong>${{selectedFile.name}}</strong></p>
-                    <p style="color: #6c757d; font-size: 14px;">${{(selectedFile.size / (1024*1024)).toFixed(2)}} MB</p>
+                    <p style="color: #6c757d; margin-top: 1rem;"><strong>${selectedFile.name}</strong></p>
+                    <p style="color: #6c757d; font-size: 14px;">${(selectedFile.size / (1024*1024)).toFixed(2)} MB</p>
                 `;
                 
                 document.getElementById('uploadBtn').disabled = false;
-            }}
-        }});
+            }
+        });
 
         // Check if paper already exists before upload
-        function checkPaperExists() {{
-            const metadata = {{
+        function checkPaperExists() {
+            const metadata = {
                 exam_type: document.getElementById('examType').value,
                 subject: document.getElementById('subject').value,
                 year: parseInt(document.getElementById('year').value),
                 month: document.getElementById('month').value,
                 paper_type: document.getElementById('paperType').value,
                 paper_code: document.getElementById('paperCode').value
-            }};
+            };
 
-            return fetch('/api/check-paper-exists', {{
+            return fetch('/api/check-paper-exists', {
                 method: 'POST',
-                headers: {{
+                headers: {
                     'Content-Type': 'application/json'
-                }},
+                },
                 body: JSON.stringify(metadata)
-            }})
+            })
             .then(response => response.json());
-        }}
+        }
 
         // Upload file with overwrite warning
-        function uploadFile() {{
-            if (!selectedFile) {{
+        function uploadFile() {
+            if (!selectedFile) {
                 showAlert('uploadStatus', 'error', 'Please select a PDF file first');
                 return;
-            }}
+            }
 
             // First check if paper exists
             checkPaperExists()
-                .then(data => {{
-                    if (data.exists) {{
+                .then(data => {
+                    if (data.exists) {
                         // Show overwrite warning
                         const confirmOverwrite = confirm(
-                            `⚠️ PAPER ALREADY EXISTS\\n\\n${{data.message}}\\n\\nUploading will REPLACE all existing questions for this paper.\\n\\nDo you want to continue?`
+                            `⚠️ PAPER ALREADY EXISTS\\n\\n${data.message}\\n\\nUploading will REPLACE all existing questions for this paper.\\n\\nDo you want to continue?`
                         );
                         
-                        if (!confirmOverwrite) {{
+                        if (!confirmOverwrite) {
                             showAlert('uploadStatus', 'warning', '📋 Upload cancelled. Paper was not overwritten.');
                             return;
-                        }}
+                        }
                         
-                        showAlert('uploadStatus', 'warning', `⚠️ Overwriting existing paper: ${{data.paper_name}}`);
-                    }}
+                        showAlert('uploadStatus', 'warning', `⚠️ Overwriting existing paper: ${data.paper_name}`);
+                    }
                     
                     // Proceed with upload
                     performUpload();
-                }})
-                .catch(error => {{
+                })
+                .catch(error => {
                     console.error('Error checking paper existence:', error);
                     // If check fails, proceed with upload anyway
                     performUpload();
-                }});
-        }}
+                });
+        }
 
         // Perform the actual upload
-        function performUpload() {{
-            examMetadata = {{
+        function performUpload() {
+            examMetadata = {
                 exam_type: document.getElementById('examType').value,
                 subject: document.getElementById('subject').value,
                 year: parseInt(document.getElementById('year').value),
                 month: document.getElementById('month').value,
                 paper_type: document.getElementById('paperType').value,
                 paper_code: document.getElementById('paperCode').value
-            }};
+            };
 
             const formData = new FormData();
             formData.append('file', selectedFile);
@@ -1304,35 +1314,35 @@ HTML_TEMPLATE = f'''
             uploadBtn.disabled = true;
             uploadBtn.innerHTML = '<span class="spinner"></span>Uploading...';
 
-            fetch('/api/upload', {{
+            fetch('/api/upload', {
                 method: 'POST',
                 body: formData
-            }})
+            })
             .then(response => response.json())
-            .then(data => {{
-                if (data.success) {{
+            .then(data => {
+                if (data.success) {
                     currentPaperFolder = data.paper_folder;
-                    showAlert('uploadStatus', 'success', `✅ ${{examMetadata.exam_type}} ${{examMetadata.subject}} ${{examMetadata.year}} ${{examMetadata.month}} Paper ${{examMetadata.paper_code}} uploaded successfully!<br>📁 Folder: ${{data.paper_folder}}`);
+                    showAlert('uploadStatus', 'success', `✅ ${examMetadata.exam_type} ${examMetadata.subject} ${examMetadata.year} ${examMetadata.month} Paper ${examMetadata.paper_code} uploaded successfully!<br>📁 Folder: ${data.paper_folder}`);
                     
                     document.getElementById('extract-tab-btn').disabled = false;
                     document.getElementById('extractBtn').disabled = false;
                     
                     setTimeout(() => showTab('extract'), 2000);
-                }} else {{
-                    showAlert('uploadStatus', 'error', `❌ Upload failed: ${{data.error}}`);
-                }}
-            }})
-            .catch(error => {{
-                showAlert('uploadStatus', 'error', `❌ Upload error: ${{error.message}}`);
-            }})
-            .finally(() => {{
+                } else {
+                    showAlert('uploadStatus', 'error', `❌ Upload failed: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                showAlert('uploadStatus', 'error', `❌ Upload error: ${error.message}`);
+            })
+            .finally(() => {
                 uploadBtn.disabled = false;
                 uploadBtn.innerHTML = '📤 Upload PDF';
-            }});
-        }}
+            });
+        }
 
         // Extract questions
-        function extractQuestions() {{
+        function extractQuestions() {
             const extractBtn = document.getElementById('extractBtn');
             const progressDiv = document.getElementById('extractProgress');
             const progressBar = document.getElementById('extractProgressBar');
@@ -1347,41 +1357,41 @@ HTML_TEMPLATE = f'''
             // Progress simulation
             let progress = 0;
             const stages = [
-                {{ progress: 15, text: "Loading extractor module..." }},
-                {{ progress: 30, text: "Analyzing PDF structure..." }},
-                {{ progress: 50, text: "Detecting question boundaries..." }},
-                {{ progress: 70, text: "Extracting question images..." }},
-                {{ progress: 90, text: "Enhancing image quality..." }},
-                {{ progress: 100, text: "Finalizing extraction..." }}
+                { progress: 15, text: "Loading extractor module..." },
+                { progress: 30, text: "Analyzing PDF structure..." },
+                { progress: 50, text: "Detecting question boundaries..." },
+                { progress: 70, text: "Extracting question images..." },
+                { progress: 90, text: "Enhancing image quality..." },
+                { progress: 100, text: "Finalizing extraction..." }
             ];
             
             let stageIndex = 0;
-            const progressInterval = setInterval(() => {{
-                if (stageIndex < stages.length) {{
+            const progressInterval = setInterval(() => {
+                if (stageIndex < stages.length) {
                     const stage = stages[stageIndex];
                     progress = stage.progress;
                     progressBar.style.width = progress + '%';
                     progressBar.textContent = progress + '%';
                     progressText.textContent = stage.text;
                     stageIndex++;
-                }} else {{
+                } else {
                     clearInterval(progressInterval);
-                }}
-            }}, 1000);
+                }
+            }, 1000);
 
-            fetch('/api/extract', {{
+            fetch('/api/extract', {
                 method: 'POST'
-            }})
+            })
             .then(response => response.json())
-            .then(data => {{
+            .then(data => {
                 clearInterval(progressInterval);
                 progressBar.style.width = '100%';
                 progressBar.textContent = '100%';
                 
-                if (data.success) {{
+                if (data.success) {
                     questionsExtracted = data.questions_found;
                     currentPaperFolder = data.paper_folder_name;
-                    progressText.textContent = `✅ Successfully extracted ${{questionsExtracted}} questions!`;
+                    progressText.textContent = `✅ Successfully extracted ${questionsExtracted} questions!`;
                     
                     resultsDiv.innerHTML = `
                         <div class="alert alert-success">
@@ -1389,7 +1399,7 @@ HTML_TEMPLATE = f'''
                             <div class="results-grid">
                                 <div class="result-card">
                                     <h4>📊 Extraction Results</h4>
-                                    <p><strong>Questions found:</strong> ${{data.questions_found}}</p>
+                                    <p><strong>Questions found:</strong> ${data.questions_found}</p>
                                     <p><strong>Status:</strong> ✅ Ready for processing</p>
                                 </div>
                                 <div class="result-card">
@@ -1398,7 +1408,7 @@ HTML_TEMPLATE = f'''
                                         🚀 Go Directly to Solve
                                     </button>
                                     <button class="btn" onclick="showTab('review')" style="margin: 0.5rem 0;">
-                                        🔍 Review Images First
+                                        📝 Review Images First
                                     </button>
                                     <p style="margin-top: 1rem; font-size: 12px; color: #6c757d;">Both tabs are now enabled!</p>
                                 </div>
@@ -1413,56 +1423,56 @@ HTML_TEMPLATE = f'''
                     
                     showAlert('extractStatus', 'info', '💡 Both Review and Solve tabs are now available!');
                     
-                }} else {{
+                } else {
                     progressText.textContent = `❌ Extraction failed`;
-                    showAlert('extractStatus', 'error', `Extraction failed: ${{data.error}}`);
-                }}
-            }})
-            .catch(error => {{
+                    showAlert('extractStatus', 'error', `Extraction failed: ${data.error}`);
+                }
+            })
+            .catch(error => {
                 clearInterval(progressInterval);
-                showAlert('extractStatus', 'error', `Extraction error: ${{error.message}}`);
-            }})
-            .finally(() => {{
+                showAlert('extractStatus', 'error', `Extraction error: ${error.message}`);
+            })
+            .finally(() => {
                 extractBtn.disabled = false;
                 extractBtn.innerHTML = '⚙️ Extract Questions';
-            }});
-        }}
+            });
+        }
 
         // Updated workflow functions for correct order
-        function enableReviewTab() {{
+        function enableReviewTab() {
             document.getElementById('review-tab-btn').disabled = false;
             
             // IMPORTANT: Also enable Solve tab after extraction
             enableSolveTab();
             
             // Auto-switch to review tab after extraction
-            setTimeout(() => {{
+            setTimeout(() => {
                 showTab('review');
-            }}, 3000);
-        }}
+            }, 3000);
+        }
 
-        function enableSolveTab() {{
+        function enableSolveTab() {
             document.getElementById('solve-tab-btn').disabled = false;
             document.getElementById('launchSolverBtn').disabled = false;
-        }}
+        }
 
-        function enableSolveAfterReview() {{
+        function enableSolveAfterReview() {
             enableSolveTab();
             showAlert('reviewStatus', 'success', '✅ Review complete! You can now go to the Solve tab to process questions.');
-        }}
+        }
 
-        function enableReviewAndSolve() {{
+        function enableReviewAndSolve() {
             document.getElementById('review-tab-btn').disabled = false;
             document.getElementById('solve-tab-btn').disabled = false;
             document.getElementById('launchSolverBtn').disabled = false;
-        }}
+        }
 
         // Enhanced Solver Functions - UPDATED API ENDPOINT
-        function launchEnhancedSolver() {{
-            if (!currentPaperFolder) {{
+        function launchEnhancedSolver() {
+            if (!currentPaperFolder) {
                 showAlert('solveStatus', 'error', 'No paper folder available. Please extract questions first.');
                 return;
-            }}
+            }
             
             const progressDiv = document.getElementById('solverProgress');
             progressDiv.classList.remove('hidden');
@@ -1471,48 +1481,48 @@ HTML_TEMPLATE = f'''
             document.getElementById('solverProgressBar').style.width = '30%';
             
             // Initialize enhanced solver - CORRECTED ENDPOINT
-            fetch('/api/ai-solver/initialize', {{
+            fetch('/api/ai-solver/initialize', {
                 method: 'POST',
-                headers: {{
+                headers: {
                     'Content-Type': 'application/json'
-                }},
-                body: JSON.stringify({{
+                },
+                body: JSON.stringify({
                     paper_folder: currentPaperFolder
-                }})
-            }})
+                })
+            })
             .then(response => response.json())
-            .then(data => {{
-                if (data.success) {{
+            .then(data => {
+                if (data.success) {
                     document.getElementById('solverProgressBar').style.width = '100%';
                     document.getElementById('solverProgressText').textContent = 
-                        `✅ Enhanced solver ready! Found ${{data.data.total_questions}} questions.`;
+                        `✅ Enhanced solver ready! Found ${data.data.total_questions} questions.`;
                     
                     // Open enhanced solver in new tab
-                    const solverUrl = `/ai-solver/${{currentPaperFolder}}`;
+                    const solverUrl = `/ai-solver/${currentPaperFolder}`;
                     window.open(solverUrl, '_blank', 'width=1600,height=1000');
                     
                     showAlert('solveStatus', 'success', 
-                        `🚀 Enhanced AI Solver launched for ${{data.data.subject}} ${{data.data.year}} ${{data.data.month}} Paper ${{data.data.paper_code}}`);
+                        `🚀 Enhanced AI Solver launched for ${data.data.subject} ${data.data.year} ${data.data.month} Paper ${data.data.paper_code}`);
                     
-                    setTimeout(() => {{
+                    setTimeout(() => {
                         progressDiv.classList.add('hidden');
-                    }}, 3000);
-                }} else {{
-                    showAlert('solveStatus', 'error', `❌ Failed to initialize solver: ${{data.error}}`);
+                    }, 3000);
+                } else {
+                    showAlert('solveStatus', 'error', `❌ Failed to initialize solver: ${data.error}`);
                     progressDiv.classList.add('hidden');
-                }}
-            }})
-            .catch(error => {{
-                showAlert('solveStatus', 'error', `❌ Solver initialization error: ${{error.message}}`);
+                }
+            })
+            .catch(error => {
+                showAlert('solveStatus', 'error', `❌ Solver initialization error: ${error.message}`);
                 progressDiv.classList.add('hidden');
-            }});
-        }}
+            });
+        }
 
-        function openClaudeAI() {{
+        function openClaudeAI() {
             window.open('https://claude.ai', '_blank');
-        }}
+        }
 
-        function showSolverHelp() {{
+        function showSolverHelp() {
             alert(`🤖 Enhanced AI Solver Help
 
 1. 🚀 Launch Enhanced Solver
@@ -1540,18 +1550,18 @@ HTML_TEMPLATE = f'''
 Tips:
 • Keep the solver tab open while working
 • Process questions in batches for efficiency
-• Review flagged questions carefully`);
-        }}
+• Review flagged solutions carefully`);
+        }
 
         // Auto-load images when switching to review tab (simplified version)
-        function autoLoadImagesForReview() {{
+        function autoLoadImagesForReview() {
             const progressDiv = document.getElementById('reviewProgress');
             const galleryDiv = document.getElementById('imageGallery');
             
-            if (!currentPaperFolder) {{
+            if (!currentPaperFolder) {
                 showAlert('reviewStatus', 'error', 'No paper folder available. Please extract questions first.');
                 return;
-            }}
+            }
             
             progressDiv.classList.remove('hidden');
             galleryDiv.classList.add('hidden');
@@ -1560,23 +1570,23 @@ Tips:
             document.getElementById('reviewProgressBar').style.width = '50%';
             document.getElementById('reviewProgressBar').textContent = '50%';
             
-            fetch('/api/review/load-images', {{
+            fetch('/api/review/load-images', {
                 method: 'POST',
-                headers: {{
+                headers: {
                     'Content-Type': 'application/json'
-                }},
-                body: JSON.stringify({{
+                },
+                body: JSON.stringify({
                     paper_folder: currentPaperFolder
-                }})
-            }})
+                })
+            })
             .then(response => response.json())
-            .then(data => {{
-                if (data.success) {{
+            .then(data => {
+                if (data.success) {
                     currentImages = data.images;
                     renderImageGallery(data);
                     
                     document.getElementById('galleryInfo').textContent = 
-                        `${{data.total_images}} questions found in ${{data.paper_folder}}`;
+                        `${data.total_images} questions found in ${data.paper_folder}`;
                     
                     galleryDiv.classList.remove('hidden');
                     document.getElementById('reviewControls').classList.remove('hidden');
@@ -1584,88 +1594,88 @@ Tips:
                     document.getElementById('reviewProgressBar').style.width = '100%';
                     document.getElementById('reviewProgressBar').textContent = '100%';
                     document.getElementById('reviewProgressText').textContent = 
-                        `✅ Successfully loaded ${{data.total_images}} images for review`;
+                        `✅ Successfully loaded ${data.total_images} images for review`;
                     
-                    setTimeout(() => {{
+                    setTimeout(() => {
                         progressDiv.classList.add('hidden');
-                    }}, 2000);
-                }} else {{
-                    showAlert('reviewStatus', 'error', `❌ Failed to load images: ${{data.error}}`);
+                    }, 2000);
+                } else {
+                    showAlert('reviewStatus', 'error', `❌ Failed to load images: ${data.error}`);
                     progressDiv.classList.add('hidden');
-                }}
-            }})
-            .catch(error => {{
-                showAlert('reviewStatus', 'error', `❌ Error loading images: ${{error.message}}`);
+                }
+            })
+            .catch(error => {
+                showAlert('reviewStatus', 'error', `❌ Error loading images: ${error.message}`);
                 progressDiv.classList.add('hidden');
-            }});
-        }}
+            });
+        }
 
         // Manual load function (kept for manual refresh if needed)
-        function loadImagesForReview() {{
+        function loadImagesForReview() {
             autoLoadImagesForReview();
-        }}
+        }
 
-        function renderImageGallery(data) {{
+        function renderImageGallery(data) {
             const gridDiv = document.getElementById('imageGrid');
             gridDiv.innerHTML = '';
             
-            data.images.forEach((image, index) => {{
+            data.images.forEach((image, index) => {
                 const cardDiv = document.createElement('div');
                 cardDiv.className = 'image-review-card';
-                cardDiv.id = `image-card-${{image.question_number}}`;
+                cardDiv.id = `image-card-${image.question_number}`;
                 
                 cardDiv.innerHTML = `
-                    <h5>Question ${{image.question_number}}</h5>
-                    <img src="${{image.url}}" alt="Question ${{image.question_number}}" 
+                    <h5>Question ${image.question_number}</h5>
+                    <img src="${image.url}" alt="Question ${image.question_number}" 
                          class="image-preview" loading="lazy"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <div style="display: none; padding: 2rem; color: #dc3545;">❌ Image not found</div>
                     
                     <div class="image-info">
-                        <div><strong>File:</strong> ${{image.filename}}</div>
-                        <div><strong>Size:</strong> ${{image.file_size_mb}} MB</div>
-                        <div><strong>Dimensions:</strong> ${{image.dimensions}}</div>
-                        <div><strong>Status:</strong> <span class="status-badge status-${{image.status}}">${{image.status}}</span></div>
+                        <div><strong>File:</strong> ${image.filename}</div>
+                        <div><strong>Size:</strong> ${image.file_size_mb} MB</div>
+                        <div><strong>Dimensions:</strong> ${image.dimensions}</div>
+                        <div><strong>Status:</strong> <span class="status-badge status-${image.status}">${image.status}</span></div>
                     </div>
                     
                     <div class="image-actions">
-                        <button class="btn btn-small" onclick="toggleReplacement(${{image.question_number}})">
+                        <button class="btn btn-small" onclick="toggleReplacement(${image.question_number})">
                             🔄 Replace Image
                         </button>
-                        <button class="btn btn-small" onclick="previewFullSize('${{image.url}}')">
+                        <button class="btn btn-small" onclick="previewFullSize('${image.url}')">
                             🔍 Full Size
                         </button>
                     </div>
                     
-                    <div class="upload-replacement" id="upload-${{image.question_number}}">
+                    <div class="upload-replacement" id="upload-${image.question_number}">
                         <div style="margin-bottom: 1rem;">
                             <strong>📤 Upload Replacement Image</strong>
                             <p style="color: #6c757d; font-size: 12px; margin-top: 0.5rem;">
                                 Supports PNG, JPG, JPEG (max 10MB)
                             </p>
                         </div>
-                        <input type="file" id="file-${{image.question_number}}" 
+                        <input type="file" id="file-${image.question_number}" 
                                accept=".png,.jpg,.jpeg" style="display: none;"
-                               onchange="handleImageReplacement(${{image.question_number}}, this)">
-                        <div onclick="document.getElementById('file-${{image.question_number}}').click()" 
+                               onchange="handleImageReplacement(${image.question_number}, this)">
+                        <div onclick="document.getElementById('file-${image.question_number}').click()" 
                              style="cursor: pointer; padding: 1rem; border: 2px dashed #4facfe; border-radius: 6px;">
                             Click to select replacement image
                         </div>
                         <div style="margin-top: 1rem;">
-                            <button class="btn btn-small danger" onclick="toggleReplacement(${{image.question_number}})">
+                            <button class="btn btn-small danger" onclick="toggleReplacement(${image.question_number})">
                                 ❌ Cancel
                             </button>
                         </div>
                     </div>
                     
-                    <div class="replacement-preview" id="preview-${{image.question_number}}">
+                    <div class="replacement-preview" id="preview-${image.question_number}">
                         <strong>🔍 Replacement Ready</strong>
-                        <div id="preview-content-${{image.question_number}}"></div>
+                        <div id="preview-content-${image.question_number}"></div>
                         <div style="margin-top: 1rem;">
-                            <button class="btn btn-small success" onclick="confirmReplacement(${{image.question_number}})">
+                            <button class="btn btn-small success" onclick="confirmReplacement(${image.question_number})">
                                 ✅ Confirm
                             </button>
-                            <button class="btn btn-small danger" onclick="cancelReplacement(${{image.question_number}})">
+                            <button class="btn btn-small danger" onclick="cancelReplacement(${image.question_number})">
                                 ❌ Cancel
                             </button>
                         </div>
@@ -1673,26 +1683,48 @@ Tips:
                 `;
                 
                 gridDiv.appendChild(cardDiv);
-            }});
-        }}
+            });
+        }
 
-        function toggleReplacement(questionNumber) {{
-            const uploadDiv = document.getElementById(`upload-${{questionNumber}}`);
-            const previewDiv = document.getElementById(`preview-${{questionNumber}}`);
+        // FIXED: Toggle replacement function that properly resets upload div
+        function toggleReplacement(questionNumber) {
+            const uploadDiv = document.getElementById(`upload-${questionNumber}`);
+            const previewDiv = document.getElementById(`preview-${questionNumber}`);
             
-            if (uploadDiv.classList.contains('active')) {{
+            if (uploadDiv.classList.contains('active')) {
+                // FIXED: Reset upload div HTML to original state when closing
                 uploadDiv.classList.remove('active');
-            }} else {{
+                uploadDiv.innerHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <strong>📤 Upload Replacement Image</strong>
+                        <p style="color: #6c757d; font-size: 12px; margin-top: 0.5rem;">
+                            Supports PNG, JPG, JPEG (max 10MB)
+                        </p>
+                    </div>
+                    <input type="file" id="file-${questionNumber}" 
+                           accept=".png,.jpg,.jpeg" style="display: none;"
+                           onchange="handleImageReplacement(${questionNumber}, this)">
+                    <div onclick="document.getElementById('file-${questionNumber}').click()" 
+                         style="cursor: pointer; padding: 1rem; border: 2px dashed #4facfe; border-radius: 6px;">
+                        Click to select replacement image
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-small danger" onclick="toggleReplacement(${questionNumber})">
+                            ❌ Cancel
+                        </button>
+                    </div>
+                `;
+            } else {
                 // Hide all other open upload/preview sections
                 document.querySelectorAll('.upload-replacement.active, .replacement-preview.active')
                     .forEach(div => div.classList.remove('active'));
                 
                 uploadDiv.classList.add('active');
                 previewDiv.classList.remove('active');
-            }}
-        }}
+            }
+        }
 
-        function handleImageReplacement(questionNumber, fileInput) {{
+        function handleImageReplacement(questionNumber, fileInput) {
             const file = fileInput.files[0];
             if (!file) return;
             
@@ -1701,30 +1733,30 @@ Tips:
             formData.append('question_number', questionNumber);
             
             const originalImage = currentImages.find(img => img.question_number === questionNumber);
-            if (originalImage) {{
+            if (originalImage) {
                 formData.append('original_filename', originalImage.filename);
-            }}
+            }
             
-            const uploadDiv = document.getElementById(`upload-${{questionNumber}}`);
-            const previewDiv = document.getElementById(`preview-${{questionNumber}}`);
+            const uploadDiv = document.getElementById(`upload-${questionNumber}`);
+            const previewDiv = document.getElementById(`preview-${questionNumber}`);
             
             // Show loading
             uploadDiv.innerHTML = '<div style="padding: 2rem;"><span class="spinner"></span>Processing image...</div>';
             
-            fetch('/api/review/replace-image', {{
+            fetch('/api/review/replace-image', {
                 method: 'POST',
                 body: formData
-            }})
+            })
             .then(response => response.json())
-            .then(data => {{
-                if (data.success) {{
+            .then(data => {
+                if (data.success) {
                     // Show preview
-                    const previewContent = document.getElementById(`preview-content-${{questionNumber}}`);
+                    const previewContent = document.getElementById(`preview-content-${questionNumber}`);
                     previewContent.innerHTML = `
-                        <img src="${{data.preview_url}}" alt="Replacement preview" style="max-width: 100%; max-height: 150px; margin: 0.5rem 0;">
+                        <img src="${data.preview_url}" alt="Replacement preview" style="max-width: 100%; max-height: 150px; margin: 0.5rem 0;">
                         <div style="font-size: 12px; color: #6c757d;">
-                            <div>Size: ${{data.replacement_info.file_size_mb}} MB</div>
-                            <div>Dimensions: ${{data.replacement_info.dimensions}}</div>
+                            <div>Size: ${data.replacement_info.file_size_mb} MB</div>
+                            <div>Dimensions: ${data.replacement_info.dimensions}</div>
                         </div>
                     `;
                     
@@ -1732,40 +1764,40 @@ Tips:
                     previewDiv.classList.add('active');
                     
                     // Mark card as having replacement
-                    const card = document.getElementById(`image-card-${{questionNumber}}`);
+                    const card = document.getElementById(`image-card-${questionNumber}`);
                     card.classList.add('has-replacement');
                     
                     pendingReplacements[questionNumber] = data.replacement_info;
                     updatePendingCount();
                     
                     showAlert('reviewStatus', 'success', 
-                        `✅ Replacement image staged for Question ${{questionNumber}}`);
-                }} else {{
-                    showAlert('reviewStatus', 'error', `❌ Failed to stage replacement: ${{data.error}}`);
-                    // Reset upload div
+                        `✅ Replacement image staged for Question ${questionNumber}`);
+                } else {
+                    showAlert('reviewStatus', 'error', `❌ Failed to stage replacement: ${data.error}`);
+                    // FIXED: Reset upload div to original state
                     toggleReplacement(questionNumber);
                     toggleReplacement(questionNumber);
-                }}
-            }})
-            .catch(error => {{
-                showAlert('reviewStatus', 'error', `❌ Error uploading replacement: ${{error.message}}`);
-                // Reset upload div
+                }
+            })
+            .catch(error => {
+                showAlert('reviewStatus', 'error', `❌ Error uploading replacement: ${error.message}`);
+                // FIXED: Reset upload div to original state
                 toggleReplacement(questionNumber);
                 toggleReplacement(questionNumber);
-            }});
-        }}
+            });
+        }
 
-        function confirmReplacement(questionNumber) {{
-            const previewDiv = document.getElementById(`preview-${{questionNumber}}`);
+        function confirmReplacement(questionNumber) {
+            const previewDiv = document.getElementById(`preview-${questionNumber}`);
             previewDiv.classList.remove('active');
             
             showAlert('reviewStatus', 'info', 
-                `✅ Replacement for Question ${{questionNumber}} confirmed. Click "Update All Changes" to apply.`);
-        }}
+                `✅ Replacement for Question ${questionNumber} confirmed. Click "Update All Changes" to apply.`);
+        }
 
-        function cancelReplacement(questionNumber) {{
-            const card = document.getElementById(`image-card-${{questionNumber}}`);
-            const previewDiv = document.getElementById(`preview-${{questionNumber}}`);
+        function cancelReplacement(questionNumber) {
+            const card = document.getElementById(`image-card-${questionNumber}`);
+            const previewDiv = document.getElementById(`preview-${questionNumber}`);
             
             card.classList.remove('has-replacement');
             previewDiv.classList.remove('active');
@@ -1773,38 +1805,38 @@ Tips:
             delete pendingReplacements[questionNumber];
             updatePendingCount();
             
-            showAlert('reviewStatus', 'info', `Replacement for Question ${{questionNumber}} cancelled`);
-        }}
+            showAlert('reviewStatus', 'info', `Replacement for Question ${questionNumber} cancelled`);
+        }
 
-        function updatePendingCount() {{
+        function updatePendingCount() {
             const count = Object.keys(pendingReplacements).length;
             const countSpan = document.getElementById('pendingCount');
             const updateBtn = document.getElementById('updateAllBtn');
             const resetBtn = document.getElementById('resetReplacementsBtn');
             
-            if (count > 0) {{
-                countSpan.textContent = `${{count}} pending replacement${{count > 1 ? 's' : ''}}`;
+            if (count > 0) {
+                countSpan.textContent = `${count} pending replacement${count > 1 ? 's' : ''}`;
                 countSpan.style.display = 'inline';
                 updateBtn.disabled = false;
                 resetBtn.disabled = false;
-            }} else {{
+            } else {
                 countSpan.style.display = 'none';
                 updateBtn.disabled = true;
                 resetBtn.disabled = true;
-            }}
-        }}
+            }
+        }
 
-        function updateAllImages() {{
+        function updateAllImages() {
             const updateBtn = document.getElementById('updateAllBtn');
             const count = Object.keys(pendingReplacements).length;
             
-            if (count === 0) {{
+            if (count === 0) {
                 showAlert('reviewStatus', 'warning', 'No pending replacements to apply');
                 return;
-            }}
+            }
             
             const confirmUpdate = confirm(
-                `Apply ${{count}} image replacement${{count > 1 ? 's' : ''}}?\\n\\nThis will permanently replace the original images.\\nBackups will be created automatically.\\n\\nContinue?`
+                `Apply ${count} image replacement${count > 1 ? 's' : ''}?\\n\\nThis will permanently replace the original images.\\nBackups will be created automatically.\\n\\nContinue?`
             );
             
             if (!confirmUpdate) return;
@@ -1812,314 +1844,210 @@ Tips:
             updateBtn.disabled = true;
             updateBtn.innerHTML = '<span class="spinner"></span>Updating Images...';
             
-            fetch('/api/review/update-all-images', {{
+            fetch('/api/review/update-all-images', {
                 method: 'POST'
-            }})
+            })
             .then(response => response.json())
-            .then(data => {{
-                if (data.success) {{
+            .then(data => {
+                if (data.success) {
                     // Clear all replacement indicators
-                    document.querySelectorAll('.image-review-card').forEach(card => {{
+                    document.querySelectorAll('.image-review-card').forEach(card => {
                         card.classList.remove('has-replacement');
-                    }});
-                    document.querySelectorAll('.replacement-preview.active').forEach(preview => {{
+                    });
+                    document.querySelectorAll('.replacement-preview.active').forEach(preview => {
                         preview.classList.remove('active');
-                    }});
+                    });
                     
-                    pendingReplacements = {{}};
+                    pendingReplacements = {};
                     updatePendingCount();
                     
                     showAlert('reviewStatus', 'success', 
-                        `🎉 Successfully updated ${{data.applied_count}} images!\\nBackups saved to: backup_images folder`);
+                        `🎉 Successfully updated ${data.applied_count} images!\\nBackups saved to: backup_images folder`);
                     
                     // Enable solve tab after successful review completion
                     enableSolveAfterReview();
                     
-                    // IMPROVED: Force complete image refresh with multiple strategies
-                    setTimeout(() => {{
-                        console.log('🔄 Starting aggressive image refresh...');
-                        
-                        // Strategy 1: Reload images with unique timestamps
-                        document.querySelectorAll('.image-preview').forEach((img, index) => {{
-                            const currentSrc = img.src;
-                            if (currentSrc) {{
-                                const baseUrl = currentSrc.split('?')[0];
-                                const uniqueTimestamp = Date.now() + Math.random() * 1000 + index;
-                                const newSrc = baseUrl + `?nocache=${{uniqueTimestamp}}&refresh=${{Math.random()}}`;
-                                
-                                console.log(`🔄 Refreshing image ${{index + 1}}: ${{newSrc}}`);
-                                
-                                // Create new image element to force reload
-                                const newImg = new Image();
-                                newImg.onload = function() {{
-                                    img.src = newSrc;
-                                    console.log(`✅ Image ${{index + 1}} refreshed successfully`);
-                                }};
-                                newImg.onerror = function() {{
-                                    console.log(`❌ Failed to refresh image ${{index + 1}}`);
-                                    // Fallback: try direct assignment
-                                    img.src = newSrc;
-                                }};
-                                newImg.src = newSrc;
-                            }}
-                        }});
-                        
-                        // Strategy 2: Full gallery reload after a delay
-                        setTimeout(() => {{
-                            console.log('🔄 Full gallery reload...');
-                            forceReloadImages();
-                        }}, 2000);
-                        
-                        // Strategy 3: Individual image refresh as final fallback
-                        setTimeout(() => {{
-                            console.log('🔄 Individual refresh fallback...');
-                            document.querySelectorAll('.image-preview').forEach((img, index) => {{
-                                if (img.complete && img.naturalHeight === 0) {{
-                                    console.log(`🔄 Fixing broken image ${{index + 1}}`);
-                                    const questionNumber = index + 1;
-                                    forceRefreshImage(questionNumber);
-                                }}
-                            }});
-                        }}, 4000);
-                        
-                    }}, 500);
-                }} else {{
-                    showAlert('reviewStatus', 'error', `❌ Failed to update images: ${{data.error}}`);
-                }}
-            }})
-            .catch(error => {{
-                showAlert('reviewStatus', 'error', `❌ Error updating images: ${{error.message}}`);
-            }})
-            .finally(() => {{
+                    // Force image refresh
+                    setTimeout(() => {
+                        forceReloadImages();
+                    }, 1000);
+                } else {
+                    showAlert('reviewStatus', 'error', `❌ Failed to update images: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                showAlert('reviewStatus', 'error', `❌ Error updating images: ${error.message}`);
+            })
+            .finally(() => {
                 updateBtn.disabled = false;
                 updateBtn.innerHTML = '💾 Update All Changes';
-            }});
-        }}
+            });
+        }
 
-        function forceReloadImages() {{
-            console.log('🔄 Starting full image reload...');
-            
-            fetch('/api/review/load-images', {{
+        function forceReloadImages() {
+            fetch('/api/review/load-images', {
                 method: 'POST',
-                headers: {{
+                headers: {
                     'Content-Type': 'application/json'
-                }},
-                body: JSON.stringify({{
+                },
+                body: JSON.stringify({
                     paper_folder: currentPaperFolder
-                }})
-            }})
+                })
+            })
             .then(response => response.json())
-            .then(data => {{
-                if (data.success) {{
+            .then(data => {
+                if (data.success) {
                     currentImages = data.images;
-                    console.log('📊 Loaded fresh image data:', data.images.length, 'images');
                     
                     // Update all image sources with fresh URLs
-                    data.images.forEach((image, index) => {{
-                        const imgElement = document.querySelector(`#image-card-${{image.question_number}} .image-preview`);
-                        if (imgElement) {{
-                            console.log(`🔄 Updating image ${{image.question_number}} with URL: ${{image.url}}`);
-                            
-                            // Force browser to reload by creating new image element
-                            const newImg = new Image();
-                            newImg.onload = function() {{
-                                imgElement.src = image.url;
-                                console.log(`✅ Image ${{image.question_number}} updated successfully`);
-                            }};
-                            newImg.onerror = function() {{
-                                console.log(`❌ Failed to load new image ${{image.question_number}}`);
-                                // Try direct assignment anyway
-                                imgElement.src = image.url;
-                            }};
-                            newImg.src = image.url;
-                            
-                            // Also update image info
-                            const infoDiv = document.querySelector(`#image-card-${{image.question_number}} .image-info`);
-                            if (infoDiv) {{
-                                infoDiv.innerHTML = `
-                                    <div><strong>File:</strong> ${{image.filename}}</div>
-                                    <div><strong>Size:</strong> ${{image.file_size_mb}} MB</div>
-                                    <div><strong>Dimensions:</strong> ${{image.dimensions}}</div>
-                                    <div><strong>Status:</strong> <span class="status-badge status-${{image.status}}">${{image.status}}</span></div>
-                                `;
-                            }}
-                        }}
-                    }});
+                    data.images.forEach((image, index) => {
+                        const imgElement = document.querySelector(`#image-card-${image.question_number} .image-preview`);
+                        if (imgElement) {
+                            const uniqueTimestamp = Date.now() + Math.random() * 1000 + index;
+                            const newSrc = image.url + `?nocache=${uniqueTimestamp}`;
+                            imgElement.src = newSrc;
+                        }
+                    });
                     
                     showAlert('reviewStatus', 'success', 
                         `✅ Images refreshed successfully! Updated images should now be visible.`);
-                }} else {{
-                    showAlert('reviewStatus', 'error', `❌ Failed to refresh images: ${{data.error}}`);
-                }}
-            }})
-            .catch(error => {{
-                console.error('❌ Error in forceReloadImages:', error);
-                showAlert('reviewStatus', 'error', `❌ Error refreshing images: ${{error.message}}`);
-            }});
-        }}
+                }
+            })
+            .catch(error => {
+                console.error('Error in forceReloadImages:', error);
+            });
+        }
 
-        function forceRefreshImage(questionNumber) {{
-            const imgElement = document.querySelector(`#image-card-${{questionNumber}} .image-preview`);
-            if (imgElement) {{
-                console.log(`🔄 Force refreshing image ${{questionNumber}}`);
-                
-                const baseUrl = imgElement.src.split('?')[0];
-                const uniqueTimestamp = Date.now() + Math.random() * 1000;
-                const newSrc = baseUrl + `?nocache=${{uniqueTimestamp}}&refresh=${{Math.random()}}&q=${{questionNumber}}`;
-                
-                // Create new image to preload
-                const newImg = new Image();
-                newImg.onload = function() {{
-                    imgElement.src = newSrc;
-                    console.log(`✅ Image ${{questionNumber}} force refresh completed`);
-                    showAlert('reviewStatus', 'info', `🔄 Refreshed image for Question ${{questionNumber}}`);
-                }};
-                newImg.onerror = function() {{
-                    console.log(`❌ Force refresh failed for image ${{questionNumber}}`);
-                    // Fallback: direct assignment
-                    imgElement.src = newSrc;
-                }};
-                newImg.src = newSrc;
-            }}
-        }}
-
-        function resetReplacements() {{
+        function resetReplacements() {
             const count = Object.keys(pendingReplacements).length;
             
-            if (count === 0) {{
+            if (count === 0) {
                 showAlert('reviewStatus', 'warning', 'No pending replacements to reset');
                 return;
-            }}
+            }
             
             const confirmReset = confirm(
-                `Reset ${{count}} pending replacement${{count > 1 ? 's' : ''}}?\\n\\nAll staged replacements will be discarded.`
+                `Reset ${count} pending replacement${count > 1 ? 's' : ''}?\\n\\nAll staged replacements will be discarded.`
             );
             
             if (!confirmReset) return;
             
-            fetch('/api/review/reset-replacements', {{
+            fetch('/api/review/reset-replacements', {
                 method: 'POST'
-            }})
+            })
             .then(response => response.json())
-            .then(data => {{
-                if (data.success) {{
+            .then(data => {
+                if (data.success) {
                     // Clear all replacement indicators
-                    document.querySelectorAll('.image-review-card').forEach(card => {{
+                    document.querySelectorAll('.image-review-card').forEach(card => {
                         card.classList.remove('has-replacement');
-                    }});
-                    document.querySelectorAll('.replacement-preview.active, .upload-replacement.active').forEach(div => {{
+                    });
+                    document.querySelectorAll('.replacement-preview.active, .upload-replacement.active').forEach(div => {
                         div.classList.remove('active');
-                    }});
+                    });
                     
-                    pendingReplacements = {{}};
+                    pendingReplacements = {};
                     updatePendingCount();
                     
                     showAlert('reviewStatus', 'success', 
-                        `✅ Reset ${{data.cleared_count}} pending replacements`);
-                }} else {{
-                    showAlert('reviewStatus', 'error', `❌ Failed to reset: ${{data.error}}`);
-                }}
-            }})
-            .catch(error => {{
-                showAlert('reviewStatus', 'error', `❌ Error resetting: ${{error.message}}`);
-            }});
-        }}
+                        `✅ Reset ${data.cleared_count} pending replacements`);
+                } else {
+                    showAlert('reviewStatus', 'error', `❌ Failed to reset: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                showAlert('reviewStatus', 'error', `❌ Error resetting: ${error.message}`);
+            });
+        }
 
-        function previewFullSize(imageUrl) {{
+        function previewFullSize(imageUrl) {
             window.open(imageUrl, '_blank');
-        }}
+        }
 
-        function goToSolve() {{
+        function goToSolve() {
             const confirmGo = confirm(
                 `🚀 Go to Solve Tab?\\n\\nThis will:\\n• Keep current images as-is\\n• Enable the Solve tab\\n• Switch to Solve tab\\n\\nContinue?`
             );
             
-            if (confirmGo) {{
-                // Ensure solve tab is enabled
+            if (confirmGo) {
                 enableSolveTab();
-                
-                // Switch to solve tab
                 showTab('solve');
-                
                 showAlert('reviewStatus', 'info', 
                     '🚀 Moved to Solve tab. Images ready for processing. You can return to Review anytime.');
-            }}
-        }}
+            }
+        }
 
         // Utility function to show alerts
-        function showAlert(containerId, type, message) {{
+        function showAlert(containerId, type, message) {
             const container = document.getElementById(containerId);
-            container.innerHTML = `<div class="alert alert-${{type}}">${{message}}</div>`;
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
             
-            if (type === 'success' || type === 'info') {{
-                setTimeout(() => {{
-                    if (container.innerHTML.includes(message.substring(0, 50))) {{
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    if (container.innerHTML.includes(message.substring(0, 50))) {
                         container.innerHTML = '';
-                    }}
-                }}, 10000);
-            }}
-        }}
+                    }
+                }, 10000);
+            }
+        }
 
         // Drag and drop support
         const uploadArea = document.getElementById('upload-area');
         
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {{
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             uploadArea.addEventListener(eventName, preventDefaults, false);
-        }});
+        });
 
-        function preventDefaults(e) {{
+        function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
-        }}
+        }
 
-        ['dragenter', 'dragover'].forEach(eventName => {{
+        ['dragenter', 'dragover'].forEach(eventName => {
             uploadArea.addEventListener(eventName, highlight, false);
-        }});
+        });
 
-        ['dragleave', 'drop'].forEach(eventName => {{
+        ['dragleave', 'drop'].forEach(eventName => {
             uploadArea.addEventListener(eventName, unhighlight, false);
-        }});
+        });
 
-        function highlight(e) {{
+        function highlight(e) {
             uploadArea.style.background = '#e3f2fd';
             uploadArea.style.borderColor = '#2196F3';
-        }}
+        }
 
-        function unhighlight(e) {{
+        function unhighlight(e) {
             uploadArea.style.background = selectedFile ? '#f0fff0' : '#f8f9ff';
             uploadArea.style.borderColor = selectedFile ? '#28a745' : '#4facfe';
-        }}
+        }
 
         uploadArea.addEventListener('drop', handleDrop, false);
 
-        function handleDrop(e) {{
+        function handleDrop(e) {
             const dt = e.dataTransfer;
             const files = dt.files;
             
-            if (files.length > 0) {{
+            if (files.length > 0) {
                 const file = files[0];
-                if (file.type === 'application/pdf') {{
+                if (file.type === 'application/pdf') {
                     selectedFile = file;
                     document.getElementById('fileInput').files = files;
-                    const event = new Event('change', {{ bubbles: true }});
+                    const event = new Event('change', { bubbles: true });
                     document.getElementById('fileInput').dispatchEvent(event);
-                }} else {{
+                } else {
                     showAlert('uploadStatus', 'error', '❌ Please drop a PDF file only.');
-                }}
-            }}
-        }}
+                }
+            }
+        }
 
-        // Check initial status - Updated for correct workflow order
-        window.addEventListener('load', function() {{
+        // Check initial status
+        window.addEventListener('load', function() {
             fetch('/api/status')
                 .then(response => response.json())
-                .then(data => {{
-                    console.log('Status check result:', data);
-                    
-                    // Check for existing question banks
-                    if (data.question_banks && data.question_banks.length > 0) {{
+                .then(data => {
+                    if (data.question_banks && data.question_banks.length > 0) {
                         const lastBank = data.question_banks[data.question_banks.length - 1];
-                        if (lastBank.has_questions) {{
+                        if (lastBank.has_questions) {
                             questionsExtracted = lastBank.image_count;
                             extractionComplete = true;
                             currentPaperFolder = lastBank.folder_name;
@@ -2127,42 +2055,14 @@ Tips:
                             document.getElementById('extract-tab-btn').disabled = false;
                             enableReviewAndSolve();
                             
-                            showAlert('uploadStatus', 'info', `✅ Found existing question bank: ${{lastBank.folder_name}} with ${{lastBank.image_count}} questions. Both Review and Solve tabs are now available!`);
-                            
-                            // Show the extraction results section if questions exist
-                            document.getElementById('extractResults').innerHTML = `
-                                <div class="alert alert-success">
-                                    <h3>🎉 Previously Extracted Questions Found!</h3>
-                                    <div class="results-grid">
-                                        <div class="result-card">
-                                            <h4>📊 Found Results</h4>
-                                            <p><strong>Questions found:</strong> ${{lastBank.image_count}}</p>
-                                            <p><strong>Paper:</strong> ${{lastBank.folder_name}}</p>
-                                            <p><strong>Status:</strong> ✅ Ready for solving</p>
-                                        </div>
-                                        <div class="result-card">
-                                            <h4>🎯 Available Options</h4>
-                                            <button class="btn enhanced" onclick="showTab('solve')" style="margin: 0.5rem 0;">
-                                                🚀 Launch AI Solver
-                                            </button>
-                                            <button class="btn" onclick="showTab('review')" style="margin: 0.5rem 0;">
-                                                🔍 Review Images
-                                            </button>
-                                            <p style="margin-top: 1rem; font-size: 12px; color: #6c757d;">
-                                                Both tabs are enabled and ready to use!
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                            document.getElementById('extractResults').classList.remove('hidden');
-                        }}
-                    }}
-                }})
-                .catch(error => {{
+                            showAlert('uploadStatus', 'info', `✅ Found existing question bank: ${lastBank.folder_name} with ${lastBank.image_count} questions. Both Review and Solve tabs are now available!`);
+                        }
+                    }
+                })
+                .catch(error => {
                     console.error('Status check failed:', error);
-                }});
-        }});
+                });
+        });
     </script>
 </body>
 </html>
@@ -2175,7 +2075,7 @@ def home():
 
 @app.route('/api/status')
 def get_status():
-    """Get current system status with question bank overview - UPDATED FOLDER PRIORITY"""
+    """Get current system status with question bank overview"""
     try:
         status_data = {
             "extractor_available": module_manager.module_status['extractor']['available'],
@@ -2192,12 +2092,12 @@ def get_status():
         if QUESTION_BANKS_DIR.exists():
             for paper_folder in QUESTION_BANKS_DIR.iterdir():
                 if paper_folder.is_dir():
-                    # UPDATED: Check with standardized folder priority (images first, extracted_images fallback)
+                    # Check with standardized folder priority
                     images_folder = paper_folder / "images"
                     extracted_images_folder = paper_folder / "extracted_images"
                     metadata_file = paper_folder / "metadata.json"
                     
-                    # UPDATED: Count images with correct priority
+                    # Count images with correct priority
                     image_count = 0
                     if images_folder.exists():
                         image_files = list(images_folder.glob("question_*_enhanced.png"))
@@ -2225,9 +2125,8 @@ def get_status():
                     
                     status_data["question_banks"].append(paper_info)
         
-        # Check current paper status with updated folder priority
+        # Check current paper status
         if CURRENT_PAPER_FOLDER and CURRENT_PAPER_FOLDER.exists():
-            # UPDATED: Check with standardized folder priority (images first, extracted_images fallback)
             images_folder = CURRENT_PAPER_FOLDER / "images"
             extracted_images_folder = CURRENT_PAPER_FOLDER / "extracted_images"
             
@@ -2259,7 +2158,7 @@ def get_status():
 
 @app.route('/api/check-paper-exists', methods=['POST'])
 def check_paper_exists():
-    """Check if a paper already exists before upload - UPDATED FOLDER PRIORITY"""
+    """Check if a paper already exists before upload"""
     try:
         data = request.get_json()
         
@@ -2272,16 +2171,13 @@ def check_paper_exists():
         paper_folder_path = QUESTION_BANKS_DIR / paper_folder_name
         
         if paper_folder_path.exists():
-            # UPDATED: Count existing questions with standardized folder priority
             images_folder = paper_folder_path / "images"
             extracted_images_folder = paper_folder_path / "extracted_images"
             question_count = 0
             
-            # UPDATED: Check images folder FIRST (primary)
             if images_folder.exists():
                 image_files = list(images_folder.glob("question_*_enhanced.png"))
                 question_count = len(image_files)
-            # UPDATED: Check extracted_images folder as FALLBACK
             elif extracted_images_folder.exists():
                 image_files = list(extracted_images_folder.glob("question_*_enhanced.png"))
                 question_count = len(image_files)
@@ -2305,24 +2201,16 @@ def check_paper_exists():
 
 @app.route('/api/upload', methods=['POST'])
 def upload_pdf():
-    """Handle PDF upload with metadata storage and folder structure - WORKING VERSION"""
+    """Handle PDF upload with metadata storage and folder structure"""
     global CURRENT_FILE_PATH, CURRENT_EXAM_METADATA, CURRENT_PAPER_FOLDER
     
     try:
-        print("📋 DEBUG: Upload endpoint called")
-        print(f"📋 DEBUG: Request method: {request.method}")
-        print(f"📋 DEBUG: Request form keys: {list(request.form.keys())}")
-        print(f"📋 DEBUG: Request files keys: {list(request.files.keys())}")
-        
         if 'file' not in request.files:
-            print("❌ ERROR: No file in request")
             return jsonify({"success": False, "error": "No file uploaded"}), 400
         
         file = request.files['file']
-        print(f"📋 DEBUG: File received: {file.filename}")
         
         if file.filename == '' or not file.filename.lower().endswith('.pdf'):
-            print("❌ ERROR: Invalid file")
             return jsonify({"success": False, "error": "Please upload a valid PDF file"}), 400
         
         # Get exam metadata
@@ -2338,9 +2226,7 @@ def upload_pdf():
         if 'metadata' in request.form:
             try:
                 metadata_str = request.form['metadata']
-                print(f"📋 DEBUG: Metadata string: {metadata_str}")
                 exam_metadata.update(json.loads(metadata_str))
-                print(f"📋 DEBUG: Parsed metadata: {exam_metadata}")
             except Exception as e:
                 print(f"⚠️ WARNING: Failed to parse metadata: {e}")
         
@@ -2350,7 +2236,6 @@ def upload_pdf():
         file.seek(0, 2)
         file_size = file.tell()
         file.seek(0)
-        print(f"📋 DEBUG: File size: {file_size} bytes")
         
         if file_size > 50 * 1024 * 1024:  # 50MB
             return jsonify({"success": False, "error": "File too large. Maximum size is 50MB"}), 400
@@ -2363,7 +2248,6 @@ def upload_pdf():
         
         paper_folder_name = f"{subject}_{year}_{month}_{paper_code}"
         paper_folder_path = QUESTION_BANKS_DIR / paper_folder_name
-        print(f"📋 DEBUG: Creating paper folder: {paper_folder_path}")
         paper_folder_path.mkdir(parents=True, exist_ok=True)
         
         CURRENT_PAPER_FOLDER = paper_folder_path
@@ -2372,20 +2256,17 @@ def upload_pdf():
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         safe_filename = f"{paper_folder_name}_{timestamp}.pdf"
         file_path = UPLOAD_FOLDER / safe_filename
-        print(f"📋 DEBUG: Saving file to: {file_path}")
         
         # Save file
         file.save(str(file_path))
         
         # Copy to expected location for extractor
         expected_path = BASE_DIR / "current_exam.pdf"
-        print(f"📋 DEBUG: Copying to extractor location: {expected_path}")
         shutil.copy2(file_path, expected_path)
         CURRENT_FILE_PATH = expected_path
         
         # Save metadata in paper folder
         metadata_path = paper_folder_path / "metadata.json"
-        print(f"📋 DEBUG: Saving metadata to: {metadata_path}")
         with open(metadata_path, 'w') as f:
             json.dump(exam_metadata, f, indent=2)
         
@@ -2410,13 +2291,11 @@ def upload_pdf():
         
     except Exception as e:
         print(f"❌ Upload error: {e}")
-        import traceback
-        traceback.print_exc()
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/extract', methods=['POST'])
 def extract_questions():
-    """Extract questions using direct call to extractor.py with shared question_banks folder"""
+    """Extract questions using direct call to extractor.py"""
     global CURRENT_PAPER_FOLDER
     
     try:
@@ -2433,28 +2312,16 @@ def extract_questions():
                 "error": "No exam metadata found. Please upload a file first."
             }), 400
         
-        print(f"🚀 Starting extraction with shared question_banks structure")
-        print(f"   Backend: {BASE_DIR}")
-        print(f"   Question Banks: {QUESTION_BANKS_DIR}")
-        
-        # Use the module manager to run extractor directly (not subprocess)
         result = module_manager.run_extractor(current_file, CURRENT_EXAM_METADATA)
         
         if not result["success"]:
             return jsonify(result), 500
         
-        # Update global folder reference
         CURRENT_PAPER_FOLDER = Path(result["paper_folder"])
-        
-        # Connect review manager
         review_manager.set_current_paper_folder(result["paper_folder_name"])
         
-        # Clean up uploaded file
         if current_file.exists():
             current_file.unlink()
-        
-        print(f"✅ Extraction completed: {result['questions_found']} questions extracted")
-        print(f"   Paper folder: {result['paper_folder']}")
         
         return jsonify({
             "success": True,
@@ -2468,9 +2335,6 @@ def extract_questions():
         
     except Exception as e:
         print(f"❌ Extraction error: {e}")
-        import traceback
-        traceback.print_exc()
-        
         return jsonify({
             "success": False,
             "error": f"Extraction failed: {str(e)}"
@@ -2478,36 +2342,32 @@ def extract_questions():
 
 @app.route('/images/<paper_folder>/<filename>')
 def serve_paper_image(paper_folder, filename):
-    """Serve images from paper-specific folders with STANDARDIZED FOLDER PRIORITY"""
+    """Serve images from paper-specific folders"""
     try:
         paper_folder_path = QUESTION_BANKS_DIR / paper_folder
         
-        # UPDATED: Try images folder FIRST (new standard)
+        # Try images folder FIRST
         images_dir = paper_folder_path / "images"
         if images_dir.exists():
             image_path = images_dir / filename
             if image_path.exists():
-                print(f"🖼️ Serving image: {image_path} (images - primary)")
                 return create_cache_busted_response(image_path)
         
-        # UPDATED: Fallback to extracted_images folder
+        # Fallback to extracted_images folder
         extracted_images_dir = paper_folder_path / "extracted_images"
         if extracted_images_dir.exists():
             image_path = extracted_images_dir / filename
             if image_path.exists():
-                print(f"🖼️ Serving image: {image_path} (extracted_images - fallback)")
                 return create_cache_busted_response(image_path)
         
-        print(f"❌ Image not found: {filename} in {paper_folder}")
         return f"Image not found: {filename} in {paper_folder}", 404
             
     except Exception as e:
-        print(f"❌ Error serving paper image {paper_folder}/{filename}: {e}")
         return "Image serving error", 500
 
 @app.route('/images/<paper_folder>/extracted_images/<filename>')
 def serve_extracted_image(paper_folder, filename):
-    """Serve images from extracted_images folder with aggressive cache-busting"""
+    """Serve images from extracted_images folder"""
     try:
         extracted_images_dir = QUESTION_BANKS_DIR / paper_folder / "extracted_images"
         if not extracted_images_dir.exists():
@@ -2517,16 +2377,14 @@ def serve_extracted_image(paper_folder, filename):
         if not image_path.exists():
             return f"Image not found: {filename}", 404
             
-        print(f"🖼️ Serving extracted image: {image_path}")
         return create_cache_busted_response(image_path)
         
     except Exception as e:
-        print(f"❌ Error serving extracted image {paper_folder}/{filename}: {e}")
         return "Image serving error", 500
 
 @app.route('/images/<paper_folder>/temp_replacements/<filename>')
 def serve_temp_replacement_image(paper_folder, filename):
-    """Serve temporary replacement images with aggressive cache-busting"""
+    """Serve temporary replacement images"""
     try:
         temp_images_dir = QUESTION_BANKS_DIR / paper_folder / "temp_replacements"
         if not temp_images_dir.exists():
@@ -2536,33 +2394,27 @@ def serve_temp_replacement_image(paper_folder, filename):
         if not image_path.exists():
             return f"Temp image not found: {filename}", 404
             
-        print(f"🖼️ Serving temp replacement image: {image_path}")
         return create_cache_busted_response(image_path)
         
     except Exception as e:
-        print(f"❌ Error serving temp replacement image {paper_folder}/{filename}: {e}")
         return "Image serving error", 500
 
 @app.route('/images/<filename>')
 def serve_image(filename):
-    """Serve extracted question images with STANDARDIZED FOLDER PRIORITY (backward compatibility)"""
+    """Serve extracted question images (backward compatibility)"""
     try:
-        # Try current paper folder first with updated priority
+        # Try current paper folder first
         if CURRENT_PAPER_FOLDER and CURRENT_PAPER_FOLDER.exists():
-            # UPDATED: Check images folder FIRST (new standard)
             images_folder = CURRENT_PAPER_FOLDER / "images"
             if images_folder.exists():
                 image_path = images_folder / filename
                 if image_path.exists():
-                    print(f"🖼️ Serving image (current/images): {image_path}")
                     return create_cache_busted_response(image_path)
             
-            # UPDATED: Then check extracted_images folder as fallback
             extracted_images_folder = CURRENT_PAPER_FOLDER / "extracted_images"
             if extracted_images_folder.exists():
                 image_path = extracted_images_folder / filename
                 if image_path.exists():
-                    print(f"🖼️ Serving image (current/extracted_images): {image_path}")
                     return create_cache_busted_response(image_path)
         
         # Fallback to old extracted_images directory
@@ -2570,14 +2422,11 @@ def serve_image(filename):
         if extracted_images_dir.exists():
             image_path = extracted_images_dir / filename
             if image_path.exists():
-                print(f"🖼️ Serving image (backend/extracted): {image_path}")
                 return create_cache_busted_response(image_path)
         
-        print(f"❌ Image not found: {filename}")
         return f"Image not found: {filename}", 404
             
     except Exception as e:
-        print(f"❌ Error serving image {filename}: {e}")
         return "Image serving error", 500
 
 @app.route('/api/export-results')
@@ -2590,14 +2439,10 @@ def export_results():
                 "error": "No current paper folder available"
             }), 400
         
-        # Look for existing JSON exports in the paper folder
         json_files = list(CURRENT_PAPER_FOLDER.glob("*.json"))
-        
-        # Filter out metadata.json
         export_files = [f for f in json_files if f.name != "metadata.json"]
         
         if export_files:
-            # Return the most recent export file
             latest_export = max(export_files, key=lambda f: f.stat().st_mtime)
             return send_file(latest_export, as_attachment=True)
         else:
@@ -2607,7 +2452,6 @@ def export_results():
             }), 404
             
     except Exception as e:
-        print(f"❌ Error exporting results: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)
@@ -2630,7 +2474,7 @@ if __name__ == '__main__':
     print(f"📂 Upload folder: {UPLOAD_FOLDER}")
     print(f"📂 Question banks (shared): {QUESTION_BANKS_DIR}")
     print(f"🔧 Extractor available: {'✅ Yes' if module_manager.module_status['extractor']['available'] else '❌ No'}")
-    print(f"🔍 Review System: ✅ Integrated")
+    print(f"📝 Review System: ✅ Integrated")
     print(f"🌐 Web interface: http://localhost:5004")
     print("=" * 70)
     

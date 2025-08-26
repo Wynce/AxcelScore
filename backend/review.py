@@ -2,7 +2,7 @@
 """
 review.py - Image Review Module for AI Tutor
 Handles image review, replacement, and quality control functionality
-FIXED VERSION - Standardized to use 'images' folder first, with enhanced cache-busting
+FIXED VERSION - Addresses preview update and upload state issues
 """
 
 from flask import Blueprint, request, jsonify, send_from_directory, render_template_string
@@ -15,6 +15,7 @@ from PIL import Image
 import tempfile
 import uuid
 import hashlib
+import time
 
 class ReviewManager:
     """Manages image review and replacement functionality"""
@@ -48,6 +49,14 @@ class ReviewManager:
         def get_replacement_status():
             return self._get_replacement_status()
         
+        @review_bp.route('/cancel-replacement', methods=['POST'])
+        def cancel_replacement():
+            return self._cancel_replacement()
+        
+        @review_bp.route('/refresh-image', methods=['POST'])
+        def refresh_image():
+            return self._refresh_image()
+        
         return review_bp
     
     def set_current_paper_folder(self, folder_name):
@@ -64,7 +73,34 @@ class ReviewManager:
             return file_hash
         except Exception as e:
             print(f"Warning: Could not generate hash for {file_path}: {e}")
-            return str(int(datetime.now().timestamp()))
+            return str(int(datetime.now().timestamp() * 1000))
+    
+    def _generate_cache_buster(self, file_path=None, extra_params=None):
+        """Generate comprehensive cache-busting parameters"""
+        current_timestamp = int(time.time() * 1000)
+        microseconds = datetime.now().microsecond
+        
+        cache_params = [
+            f"v={current_timestamp}",
+            f"t={microseconds}",
+            f"nocache={current_timestamp + microseconds}"
+        ]
+        
+        if file_path and Path(file_path).exists():
+            try:
+                file_mtime = int(Path(file_path).stat().st_mtime * 1000)
+                file_hash = self._get_file_hash(file_path)
+                cache_params.extend([
+                    f"mtime={file_mtime}",
+                    f"hash={file_hash[:8]}"
+                ])
+            except Exception as e:
+                print(f"Warning: Could not get file info for cache-busting: {e}")
+        
+        if extra_params:
+            cache_params.extend(extra_params)
+        
+        return "&".join(cache_params)
     
     def _load_images(self):
         """Load all extracted images for review with standardized folder priority"""
@@ -97,30 +133,30 @@ class ReviewManager:
             if images_folder.exists() and list(images_folder.glob("question_*_enhanced.png")):
                 active_folder = images_folder
                 folder_type = "images"
-                folder_priority_info.append(f"✅ Found images in standardized 'images/' folder")
-                print(f"🎯 Using standardized 'images' folder: {images_folder}")
+                folder_priority_info.append(f"Found images in standardized 'images/' folder")
+                print(f"Using standardized 'images' folder: {images_folder}")
             
             # Fallback: Check 'extracted_images' folder for backward compatibility
             elif extracted_images_folder.exists() and list(extracted_images_folder.glob("question_*_enhanced.png")):
                 active_folder = extracted_images_folder
                 folder_type = "extracted_images"
-                folder_priority_info.append(f"📁 Using 'extracted_images/' folder (compatibility)")
-                print(f"📁 Using compatibility 'extracted_images' folder: {extracted_images_folder}")
+                folder_priority_info.append(f"Using 'extracted_images/' folder (compatibility)")
+                print(f"Using compatibility 'extracted_images' folder: {extracted_images_folder}")
             
             # Error: No images found in either folder
             else:
                 error_details = []
                 if not images_folder.exists():
-                    error_details.append(f"❌ 'images/' folder does not exist")
+                    error_details.append(f"'images/' folder does not exist")
                 else:
                     img_count = len(list(images_folder.glob("question_*_enhanced.png")))
-                    error_details.append(f"📁 'images/' folder exists but has {img_count} question images")
+                    error_details.append(f"'images/' folder exists but has {img_count} question images")
                 
                 if not extracted_images_folder.exists():
-                    error_details.append(f"❌ 'extracted_images/' folder does not exist")
+                    error_details.append(f"'extracted_images/' folder does not exist")
                 else:
                     img_count = len(list(extracted_images_folder.glob("question_*_enhanced.png")))
-                    error_details.append(f"📁 'extracted_images/' folder exists but has {img_count} question images")
+                    error_details.append(f"'extracted_images/' folder exists but has {img_count} question images")
                 
                 return jsonify({
                     "success": False,
@@ -133,7 +169,7 @@ class ReviewManager:
             # Get all question images from active folder
             image_files = sorted(active_folder.glob("question_*_enhanced.png"))
             
-            print(f"📊 Found {len(image_files)} images in {folder_type} folder")
+            print(f"Found {len(image_files)} images in {folder_type} folder")
             
             # Load metadata
             metadata_file = self.current_paper_folder / "metadata.json"
@@ -144,7 +180,6 @@ class ReviewManager:
             
             # Prepare image data with enhanced cache-busting
             images_data = []
-            current_timestamp = int(datetime.now().timestamp() * 1000)
             
             for i, img_file in enumerate(image_files):
                 try:
@@ -153,21 +188,12 @@ class ReviewManager:
                         width, height = img.size
                     
                     file_size = img_file.stat().st_size
-                    file_mtime = int(img_file.stat().st_mtime * 1000)
                     
-                    # Generate file hash for unique cache-busting
-                    file_hash = self._get_file_hash(img_file)
-                    
-                    # Create multiple cache-busting parameters for maximum effectiveness
-                    cache_params = [
-                        f"v={max(current_timestamp, file_mtime) + i}",
-                        f"nocache={current_timestamp + i}",
-                        f"hash={file_hash[:8]}",
-                        f"mtime={file_mtime}",
-                        f"refresh={datetime.now().microsecond}",
-                        f"folder={folder_type}"  # Include folder type in cache params
-                    ]
-                    cache_string = "&".join(cache_params)
+                    # Generate comprehensive cache-busting
+                    cache_string = self._generate_cache_buster(
+                        img_file, 
+                        [f"folder={folder_type}", f"index={i}"]
+                    )
                     
                     # Construct URL based on detected folder structure
                     if folder_type == "images":
@@ -177,7 +203,7 @@ class ReviewManager:
                         # Compatibility path for 'extracted_images' folder
                         image_url = f"/images/{paper_folder}/extracted_images/{img_file.name}?{cache_string}"
                     
-                    print(f"🖼️ Generated URL for {img_file.name}: {image_url}")
+                    print(f"Generated URL for {img_file.name}: {image_url}")
                     
                     images_data.append({
                         "question_number": i + 1,
@@ -191,21 +217,18 @@ class ReviewManager:
                         "url": image_url,
                         "status": "original",
                         "last_modified": datetime.fromtimestamp(img_file.stat().st_mtime).isoformat(),
-                        "file_hash": file_hash[:8],
-                        "cache_buster": current_timestamp + i,
+                        "file_hash": self._get_file_hash(img_file)[:8],
+                        "cache_buster": int(time.time() * 1000) + i,
                         "folder_type": folder_type
                     })
                     
                 except Exception as e:
                     print(f"Error processing image {img_file}: {e}")
                     # Still create entry for broken images
-                    error_cache_params = [
-                        f"v={current_timestamp + i}",
-                        f"error=true",
-                        f"refresh={datetime.now().microsecond}",
-                        f"folder={folder_type}"
-                    ]
-                    error_cache_string = "&".join(error_cache_params)
+                    error_cache_string = self._generate_cache_buster(
+                        None,
+                        [f"error=true", f"folder={folder_type}", f"index={i}"]
+                    )
                     
                     if folder_type == "images":
                         error_url = f"/images/{paper_folder}/{img_file.name}?{error_cache_string}"
@@ -226,7 +249,7 @@ class ReviewManager:
                         "error": str(e),
                         "last_modified": "",
                         "file_hash": "error",
-                        "cache_buster": current_timestamp + i,
+                        "cache_buster": int(time.time() * 1000) + i,
                         "folder_type": folder_type
                     })
             
@@ -238,7 +261,7 @@ class ReviewManager:
                 "metadata": metadata,
                 "pending_replacements": len(self.pending_replacements),
                 "load_timestamp": datetime.now().isoformat(),
-                "cache_buster": current_timestamp,
+                "cache_buster": int(time.time() * 1000),
                 "folder_type": folder_type,
                 "active_folder": str(active_folder),
                 "folder_priority_info": folder_priority_info,
@@ -246,7 +269,7 @@ class ReviewManager:
             })
             
         except Exception as e:
-            print(f"❌ Error loading images: {str(e)}")
+            print(f"Error loading images: {str(e)}")
             return jsonify({
                 "success": False,
                 "error": str(e)
@@ -298,16 +321,17 @@ class ReviewManager:
             temp_dir = self.current_paper_folder / "temp_replacements"
             temp_dir.mkdir(exist_ok=True)
             
-            # Generate temp filename
+            # Generate temp filename with unique identifier
             file_extension = Path(file.filename).suffix.lower()
-            temp_filename = f"question_{question_number}_replacement{file_extension}"
+            unique_id = str(uuid.uuid4())[:8]
+            temp_filename = f"question_{question_number}_replacement_{unique_id}{file_extension}"
             temp_filepath = temp_dir / temp_filename
             
             # Save the uploaded file temporarily
             file.save(str(temp_filepath))
             
             # Convert to PNG if needed and get image info
-            final_temp_path = temp_dir / f"question_{question_number}_replacement.png"
+            final_temp_path = temp_dir / f"question_{question_number}_replacement_{unique_id}.png"
             
             try:
                 with Image.open(temp_filepath) as img:
@@ -333,19 +357,28 @@ class ReviewManager:
                 # Get final file info
                 final_file_size = final_temp_path.stat().st_size
                 
-                # Enhanced cache-busting for preview
-                preview_timestamp = int(datetime.now().timestamp() * 1000)
-                file_hash = self._get_file_hash(final_temp_path)
-                preview_cache_params = [
-                    f"v={preview_timestamp}",
-                    f"preview=true",
-                    f"hash={file_hash[:8]}",
-                    f"refresh={datetime.now().microsecond}"
-                ]
-                preview_cache_string = "&".join(preview_cache_params)
+                # Enhanced cache-busting for preview with unique parameters
+                preview_cache_string = self._generate_cache_buster(
+                    final_temp_path,
+                    [
+                        f"preview=true", 
+                        f"q={question_number}",
+                        f"uid={unique_id}",
+                        f"replacement=pending"
+                    ]
+                )
                 preview_url = f"/images/{self.current_paper_folder.name}/temp_replacements/{final_temp_path.name}?{preview_cache_string}"
                 
-                # Store replacement info
+                # Clean up any existing replacement for this question
+                if question_number in self.pending_replacements:
+                    old_temp_path = Path(self.pending_replacements[question_number].get("temp_path", ""))
+                    if old_temp_path.exists():
+                        try:
+                            old_temp_path.unlink()
+                        except Exception as e:
+                            print(f"Warning: Could not remove old temp file: {e}")
+                
+                # Store replacement info with unique identifiers
                 self.pending_replacements[question_number] = {
                     "original_filename": original_filename,
                     "new_filename": final_temp_path.name,
@@ -357,7 +390,9 @@ class ReviewManager:
                     "height": height,
                     "uploaded_at": datetime.now().isoformat(),
                     "status": "pending",
-                    "file_hash": file_hash[:8]
+                    "file_hash": self._get_file_hash(final_temp_path)[:8],
+                    "unique_id": unique_id,
+                    "preview_url": preview_url
                 }
                 
                 return jsonify({
@@ -366,11 +401,12 @@ class ReviewManager:
                     "question_number": question_number,
                     "replacement_info": self.pending_replacements[question_number],
                     "preview_url": preview_url,
-                    "total_pending": len(self.pending_replacements)
+                    "total_pending": len(self.pending_replacements),
+                    "cache_buster": int(time.time() * 1000)
                 })
                 
             except Exception as img_error:
-                # Clean up temp file
+                # Clean up temp files
                 if temp_filepath.exists():
                     temp_filepath.unlink()
                 if final_temp_path.exists() and final_temp_path != temp_filepath:
@@ -382,7 +418,134 @@ class ReviewManager:
                 }), 400
             
         except Exception as e:
-            print(f"❌ Error replacing image: {str(e)}")
+            print(f"Error replacing image: {str(e)}")
+            return jsonify({
+                "success": False,
+                "error": str(e)
+            }), 500
+    
+    def _cancel_replacement(self):
+        """Cancel a pending replacement for a specific question"""
+        try:
+            data = request.get_json()
+            question_number = int(data.get('question_number', 0))
+            
+            if question_number not in self.pending_replacements:
+                return jsonify({
+                    "success": False,
+                    "error": f"No pending replacement found for Question {question_number}"
+                }), 400
+            
+            # Clean up temp file
+            temp_path = Path(self.pending_replacements[question_number]["temp_path"])
+            if temp_path.exists():
+                try:
+                    temp_path.unlink()
+                except Exception as e:
+                    print(f"Warning: Could not remove temp file: {e}")
+            
+            # Remove from pending replacements
+            del self.pending_replacements[question_number]
+            
+            return jsonify({
+                "success": True,
+                "message": f"Cancelled replacement for Question {question_number}",
+                "question_number": question_number,
+                "total_pending": len(self.pending_replacements)
+            })
+            
+        except Exception as e:
+            print(f"Error cancelling replacement: {str(e)}")
+            return jsonify({
+                "success": False,
+                "error": str(e)
+            }), 500
+    
+    def _refresh_image(self):
+        """Refresh image cache for a specific question"""
+        try:
+            data = request.get_json()
+            question_number = int(data.get('question_number', 0))
+            paper_folder = data.get('paper_folder')
+            
+            if not paper_folder or not self.current_paper_folder:
+                return jsonify({
+                    "success": False,
+                    "error": "No paper folder specified"
+                }), 400
+            
+            # Determine active folder
+            images_folder = self.current_paper_folder / "images"
+            extracted_images_folder = self.current_paper_folder / "extracted_images"
+            
+            active_folder = None
+            folder_type = None
+            
+            if images_folder.exists() and list(images_folder.glob("question_*_enhanced.png")):
+                active_folder = images_folder
+                folder_type = "images"
+            elif extracted_images_folder.exists() and list(extracted_images_folder.glob("question_*_enhanced.png")):
+                active_folder = extracted_images_folder
+                folder_type = "extracted_images"
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": "No active images folder found"
+                }), 400
+            
+            # Find the image file
+            image_files = sorted(active_folder.glob("question_*_enhanced.png"))
+            if question_number <= 0 or question_number > len(image_files):
+                return jsonify({
+                    "success": False,
+                    "error": f"Question {question_number} not found"
+                }), 400
+            
+            img_file = image_files[question_number - 1]
+            
+            # Generate new cache-busting URL
+            cache_string = self._generate_cache_buster(
+                img_file,
+                [f"refresh=true", f"q={question_number}", f"folder={folder_type}"]
+            )
+            
+            if folder_type == "images":
+                new_url = f"/images/{paper_folder}/{img_file.name}?{cache_string}"
+            else:
+                new_url = f"/images/{paper_folder}/extracted_images/{img_file.name}?{cache_string}"
+            
+            # Get updated file info
+            try:
+                with Image.open(img_file) as img:
+                    width, height = img.size
+                file_size = img_file.stat().st_size
+                file_hash = self._get_file_hash(img_file)[:8]
+                last_modified = datetime.fromtimestamp(img_file.stat().st_mtime).isoformat()
+            except Exception as e:
+                return jsonify({
+                    "success": False,
+                    "error": f"Could not read image file: {e}"
+                }), 500
+            
+            return jsonify({
+                "success": True,
+                "question_number": question_number,
+                "new_url": new_url,
+                "file_info": {
+                    "file_size": file_size,
+                    "file_size_mb": round(file_size / (1024*1024), 2),
+                    "dimensions": f"{width}x{height}",
+                    "width": width,
+                    "height": height,
+                    "file_hash": file_hash,
+                    "last_modified": last_modified,
+                    "folder_type": folder_type
+                },
+                "cache_buster": int(time.time() * 1000)
+            })
+            
+        except Exception as e:
+            print(f"Error refreshing image: {str(e)}")
             return jsonify({
                 "success": False,
                 "error": str(e)
@@ -417,13 +580,13 @@ class ReviewManager:
             if images_folder.exists() and list(images_folder.glob("question_*_enhanced.png")):
                 active_folder = images_folder
                 folder_type = "images"
-                print(f"🎯 Updating images in standardized 'images' folder")
+                print(f"Updating images in standardized 'images' folder")
             
             # Fallback: Check 'extracted_images' folder
             elif extracted_images_folder.exists() and list(extracted_images_folder.glob("question_*_enhanced.png")):
                 active_folder = extracted_images_folder
                 folder_type = "extracted_images"
-                print(f"📁 Updating images in compatibility 'extracted_images' folder")
+                print(f"Updating images in compatibility 'extracted_images' folder")
             
             else:
                 return jsonify({
@@ -473,17 +636,17 @@ class ReviewManager:
                             compat_path = extracted_images_folder / original_filename
                             if compat_path.exists():
                                 shutil.copy2(temp_path, compat_path)
-                                print(f"🔄 Also updated compatibility folder: {compat_path}")
+                                print(f"Also updated compatibility folder: {compat_path}")
                         
                         elif folder_type == "extracted_images" and images_folder.exists():
                             # Also update in images folder if it exists
                             std_path = images_folder / original_filename
                             if std_path.exists():
                                 shutil.copy2(temp_path, std_path)
-                                print(f"🔄 Also updated standard folder: {std_path}")
+                                print(f"Also updated standard folder: {std_path}")
                                 
                     except Exception as sync_error:
-                        print(f"⚠️ Warning: Could not sync to other folder: {sync_error}")
+                        print(f"Warning: Could not sync to other folder: {sync_error}")
                     
                     # Force file system sync and update modification time
                     try:
@@ -495,7 +658,7 @@ class ReviewManager:
                                 os.fsync(f.fileno())
                         
                         # Update modification time to current time
-                        current_time = datetime.now().timestamp()
+                        current_time = time.time()
                         os.utime(original_path, (current_time, current_time))
                         
                         # Additional verification - check file size
@@ -503,12 +666,12 @@ class ReviewManager:
                         temp_size = temp_path.stat().st_size
                         
                         if new_size != temp_size:
-                            print(f"⚠️ Warning: File size mismatch for {original_filename} (expected: {temp_size}, actual: {new_size})")
+                            print(f"Warning: File size mismatch for {original_filename} (expected: {temp_size}, actual: {new_size})")
                         else:
-                            print(f"✅ File replacement verified: {original_filename} ({new_size} bytes)")
+                            print(f"File replacement verified: {original_filename} ({new_size} bytes)")
                             
                     except Exception as sync_error:
-                        print(f"⚠️ Warning: File sync failed for {original_filename}: {sync_error}")
+                        print(f"Warning: File sync failed for {original_filename}: {sync_error}")
                     
                     applied_replacements.append({
                         "question_number": question_number,
@@ -517,23 +680,24 @@ class ReviewManager:
                         "new_file_size": replacement_info["file_size"],
                         "dimensions": replacement_info["dimensions"],
                         "replacement_timestamp": datetime.now().isoformat(),
-                        "active_folder": folder_type
+                        "active_folder": folder_type,
+                        "new_cache_buster": int(time.time() * 1000)
                     })
                     
-                    print(f"✅ Replaced Question {question_number}: {original_filename}")
+                    print(f"Replaced Question {question_number}: {original_filename}")
                     
                 except Exception as e:
                     failed_replacements.append({
                         "question_number": question_number,
                         "error": str(e)
                     })
-                    print(f"❌ Failed to replace Question {question_number}: {e}")
+                    print(f"Failed to replace Question {question_number}: {e}")
             
             # Clean up temp directory
             if temp_dir.exists():
                 try:
                     shutil.rmtree(temp_dir)
-                    print(f"🧹 Cleaned up temp directory: {temp_dir}")
+                    print(f"Cleaned up temp directory: {temp_dir}")
                 except Exception as e:
                     print(f"Warning: Could not clean up temp directory: {e}")
             
@@ -567,19 +731,6 @@ class ReviewManager:
             except Exception as e:
                 print(f"Warning: Could not update metadata: {e}")
             
-            # Force system-wide cache invalidation
-            try:
-                # Additional file system operations to ensure cache invalidation
-                for replacement in applied_replacements:
-                    file_path = active_folder / replacement["original_filename"]
-                    if file_path.exists():
-                        # Touch the file again to ensure timestamp update
-                        file_path.touch()
-                
-                print(f"🔄 Applied {len(applied_replacements)} file system cache invalidations")
-            except Exception as e:
-                print(f"Warning: Cache invalidation failed: {e}")
-            
             return jsonify({
                 "success": True,
                 "message": f"Applied {len(applied_replacements)} image replacements",
@@ -590,11 +741,12 @@ class ReviewManager:
                 "backup_location": str(backup_dir),
                 "update_timestamp": datetime.now().isoformat(),
                 "active_folder": str(active_folder),
-                "folder_type": folder_type
+                "folder_type": folder_type,
+                "cache_buster": int(time.time() * 1000)
             })
             
         except Exception as e:
-            print(f"❌ Error updating images: {str(e)}")
+            print(f"Error updating images: {str(e)}")
             return jsonify({
                 "success": False,
                 "error": str(e)
@@ -625,7 +777,7 @@ class ReviewManager:
             })
             
         except Exception as e:
-            print(f"❌ Error resetting replacements: {str(e)}")
+            print(f"Error resetting replacements: {str(e)}")
             return jsonify({
                 "success": False,
                 "error": str(e)
@@ -642,7 +794,7 @@ class ReviewManager:
             })
             
         except Exception as e:
-            print(f"❌ Error getting replacement status: {str(e)}")
+            print(f"Error getting replacement status: {str(e)}")
             return jsonify({
                 "success": False,
                 "error": str(e)
@@ -653,19 +805,19 @@ def create_review_html_tab():
     return '''
             <!-- Review Tab -->
             <div class="tab-pane" id="review-tab">
-                <h2>🔍 Review Extracted Images</h2>
+                <h2>Review Extracted Images</h2>
                 <p style="margin-bottom: 2rem; color: #6c757d;">Review and replace extracted question images if needed (standardized folder structure)</p>
 
                 <div id="reviewStatus">
                     <div class="alert alert-info">
-                        <strong>📋 Review Process:</strong>
+                        <strong>Review Process:</strong>
                         <ol style="margin-top: 10px; margin-left: 20px; line-height: 1.6;">
                             <li><strong>Review Quality:</strong> Check if images are correctly extracted</li>
                             <li><strong>Replace if Needed:</strong> Upload replacement images for poor extractions</li>
                             <li><strong>Update All:</strong> Apply all replacements (images auto-refresh)</li>
                         </ol>
                         <div style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-radius: 6px;">
-                            <strong>📁 Folder Priority:</strong> Uses standardized 'images/' folder first, falls back to 'extracted_images/' for compatibility
+                            <strong>Folder Priority:</strong> Uses standardized 'images/' folder first, falls back to 'extracted_images/' for compatibility
                         </div>
                     </div>
                 </div>
@@ -673,21 +825,21 @@ def create_review_html_tab():
                 <div id="reviewControls" class="hidden" style="margin-bottom: 2rem;">
                     <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <button id="updateAllBtn" class="btn success" onclick="updateAllImages()" disabled>
-                            💾 Update All Changes
+                            Update All Changes
                         </button>
                         <button id="resetReplacementsBtn" class="btn danger" onclick="resetReplacements()" disabled>
-                            🔄 Reset Changes
+                            Reset Changes
                         </button>
                         <span id="pendingCount" class="status-pending" style="display: none;"></span>
                         <button id="goToSolveBtn" class="btn enhanced" onclick="goToSolve()">
-                            🚀 Go to Solve
+                            Go to Solve
                         </button>
                     </div>
                 </div>
 
                 <div id="imageGallery" class="hidden">
                     <div id="galleryHeader" style="margin-bottom: 1rem;">
-                        <h4>📸 Question Images</h4>
+                        <h4>Question Images</h4>
                         <p id="galleryInfo" style="color: #6c757d;"></p>
                         <div id="folderInfo" style="padding: 8px 12px; background: #f8f9fa; border-radius: 6px; margin-top: 10px; font-size: 14px;"></div>
                     </div>
@@ -698,7 +850,7 @@ def create_review_html_tab():
                 </div>
 
                 <div id="reviewProgress" class="hidden">
-                    <h4>🔄 Processing Images</h4>
+                    <h4>Processing Images</h4>
                     <div class="progress">
                         <div id="reviewProgressBar" class="progress-bar" style="width: 0%">0%</div>
                     </div>
@@ -747,7 +899,7 @@ def get_review_css():
         }
         
         .image-review-card.has-replacement::before {
-            content: "🔄 Pending";
+            content: "Pending";
             position: absolute;
             top: -10px;
             right: -10px;
@@ -760,7 +912,7 @@ def get_review_css():
         }
         
         .image-review-card.standardized::after {
-            content: "🎯 Standard";
+            content: "Standard";
             position: absolute;
             top: -10px;
             left: -10px;
@@ -891,5 +1043,24 @@ def get_review_css():
         .folder-compatibility {
             background: #fff3cd;
             color: #856404;
+        }
+        
+        .processing-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .processing-overlay.active {
+            display: flex;
         }
     '''
