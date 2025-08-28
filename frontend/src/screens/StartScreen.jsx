@@ -1,11 +1,12 @@
 // ==============================
-// StartScreen.jsx - Enhanced with Subject Organization + Dark Mode + Logo
+// StartScreen.jsx - Enhanced with Subject Organization + Dark Mode + Logo + Labubu GIF
 // ==============================
 
 import React, { useState, useEffect } from 'react';
 import { getAvailableSubjects, getBanksForSubject } from '../services/questionService';
-// Import your logo
+// Import your logo and labubu gif
 import axcelLogo from '../assets/axcel-logo.png';
+import labubuGif from '../assets/labubu.gif';
 
 const StartScreen = ({ 
   onStart, 
@@ -174,25 +175,32 @@ const StartScreen = ({
     animation: 'gradientShift 8s ease infinite'
   } : {};
 
-  // Loading state - ENHANCED with Gen Alpha support
+  // Loading state - ENHANCED with Gen Alpha support and Labubu
   if (loading) {
     return (
       <div className={`min-h-screen p-4 ${getGradientClass('blue-50', 'indigo-100')}`} style={genAlphaStyle}>
         <div className="max-w-2xl mx-auto pt-20">
           <div className="text-center">
-            {/* Logo in loading screen */}
+            {/* Logo and Labubu in loading screen */}
             <div className="mb-8">
-              <div className={`inline-block p-3 rounded-full mb-4 shadow-lg ${
-                isGenAlpha 
-                  ? 'bg-white/15 backdrop-blur-xl border border-white/20'
-                  : isDarkMode 
-                  ? 'bg-gray-700/80' 
-                  : 'bg-white/90'
-              } backdrop-blur-sm`}>
+              <div className="flex justify-center items-center gap-4 mb-4">
+                <div className={`inline-block p-3 rounded-full shadow-lg ${
+                  isGenAlpha 
+                    ? 'bg-white/15 backdrop-blur-xl border border-white/20'
+                    : isDarkMode 
+                    ? 'bg-gray-700/80' 
+                    : 'bg-white/90'
+                } backdrop-blur-sm`}>
+                  <img 
+                    src={axcelLogo} 
+                    alt="Axcel Logo" 
+                    className="h-16 w-auto opacity-80"
+                  />
+                </div>
                 <img 
-                  src={axcelLogo} 
-                  alt="Axcel Logo" 
-                  className="h-16 w-auto opacity-80"
+                  src={labubuGif} 
+                  alt="Labubu" 
+                  className="h-16 w-auto rounded-lg shadow-lg opacity-90"
                 />
               </div>
             </div>
@@ -210,30 +218,37 @@ const StartScreen = ({
     );
   }
 
-  // Error state - ENHANCED with Gen Alpha support
+  // Error state - ENHANCED with Gen Alpha support and Labubu
   if (error) {
     return (
       <div className={`min-h-screen p-4 ${getGradientClass('red-50', 'pink-100')}`} style={genAlphaStyle}>
         <div className="max-w-2xl mx-auto pt-20">
           <div className="text-center">
-            {/* Logo in error screen */}
+            {/* Logo and Labubu in error screen */}
             <div className="mb-8">
-              <div className={`inline-block p-3 rounded-full mb-4 shadow-lg ${
-                isGenAlpha
-                  ? 'bg-red-500/20 backdrop-blur-xl border border-red-400/30'
-                  : isDarkMode 
-                  ? 'bg-red-900/60' 
-                  : 'bg-white/90'
-              } backdrop-blur-sm`}>
+              <div className="flex justify-center items-center gap-4 mb-4">
+                <div className={`inline-block p-3 rounded-full shadow-lg ${
+                  isGenAlpha
+                    ? 'bg-red-500/20 backdrop-blur-xl border border-red-400/30'
+                    : isDarkMode 
+                    ? 'bg-red-900/60' 
+                    : 'bg-white/90'
+                } backdrop-blur-sm`}>
+                  <img 
+                    src={axcelLogo} 
+                    alt="Axcel Logo" 
+                    className="h-16 w-auto opacity-60"
+                  />
+                </div>
                 <img 
-                  src={axcelLogo} 
-                  alt="Axcel Logo" 
-                  className="h-16 w-auto opacity-60"
+                  src={labubuGif} 
+                  alt="Labubu" 
+                  className="h-16 w-auto rounded-lg shadow-lg opacity-70 grayscale"
                 />
               </div>
             </div>
             
-            <div className="text-6xl mb-4">❌</div>
+            <div className="text-6xl mb-4">âŒ</div>
             <h2 className={`text-xl font-semibold mb-2 ${
               isGenAlpha ? 'text-red-200' :
               isDarkMode ? 'text-red-400' : 'text-red-700'
@@ -265,25 +280,32 @@ const StartScreen = ({
   const subjectNames = Object.keys(subjects);
   const hasAnyBanks = subjectNames.some(subject => subjects[subject].count > 0);
 
-  // No subjects at all - ENHANCED with Gen Alpha support
+  // No subjects at all - ENHANCED with Gen Alpha support and Labubu
   if (subjectNames.length === 0) {
     return (
       <div className={`min-h-screen p-4 ${getGradientClass('gray-50', 'gray-100')}`} style={genAlphaStyle}>
         <div className="max-w-2xl mx-auto pt-20">
           <div className="text-center">
-            {/* Logo in no subjects screen */}
+            {/* Logo and Labubu in no subjects screen */}
             <div className="mb-8">
-              <div className={`inline-block p-3 rounded-full mb-4 shadow-lg ${
-                isGenAlpha
-                  ? 'bg-white/15 backdrop-blur-xl border border-white/20'
-                  : isDarkMode 
-                  ? 'bg-gray-700/80' 
-                  : 'bg-white/90'
-              } backdrop-blur-sm`}>
+              <div className="flex justify-center items-center gap-4 mb-4">
+                <div className={`inline-block p-3 rounded-full shadow-lg ${
+                  isGenAlpha
+                    ? 'bg-white/15 backdrop-blur-xl border border-white/20'
+                    : isDarkMode 
+                    ? 'bg-gray-700/80' 
+                    : 'bg-white/90'
+                } backdrop-blur-sm`}>
+                  <img 
+                    src={axcelLogo} 
+                    alt="Axcel Logo" 
+                    className="h-20 w-auto"
+                  />
+                </div>
                 <img 
-                  src={axcelLogo} 
-                  alt="Axcel Logo" 
-                  className="h-20 w-auto"
+                  src={labubuGif} 
+                  alt="Labubu" 
+                  className="h-20 w-auto rounded-lg shadow-lg"
                 />
               </div>
             </div>
@@ -313,25 +335,32 @@ const StartScreen = ({
     );
   }
 
-  // Has subjects but no banks - ENHANCED with Gen Alpha support
+  // Has subjects but no banks - ENHANCED with Gen Alpha support and Labubu
   if (!hasAnyBanks) {
     return (
       <div className={`min-h-screen p-4 ${getGradientClass('yellow-50', 'orange-100')}`} style={genAlphaStyle}>
         <div className="max-w-2xl mx-auto pt-20">
           <div className="text-center">
-            {/* Logo in no banks screen */}
+            {/* Logo and Labubu in no banks screen */}
             <div className="mb-8">
-              <div className={`inline-block p-3 rounded-full mb-4 shadow-lg ${
-                isGenAlpha
-                  ? 'bg-orange-500/20 backdrop-blur-xl border border-orange-400/30'
-                  : isDarkMode 
-                  ? 'bg-orange-900/60' 
-                  : 'bg-white/90'
-              } backdrop-blur-sm`}>
+              <div className="flex justify-center items-center gap-4 mb-4">
+                <div className={`inline-block p-3 rounded-full shadow-lg ${
+                  isGenAlpha
+                    ? 'bg-orange-500/20 backdrop-blur-xl border border-orange-400/30'
+                    : isDarkMode 
+                    ? 'bg-orange-900/60' 
+                    : 'bg-white/90'
+                } backdrop-blur-sm`}>
+                  <img 
+                    src={axcelLogo} 
+                    alt="Axcel Logo" 
+                    className="h-20 w-auto"
+                  />
+                </div>
                 <img 
-                  src={axcelLogo} 
-                  alt="Axcel Logo" 
-                  className="h-20 w-auto"
+                  src={labubuGif} 
+                  alt="Labubu" 
+                  className="h-20 w-auto rounded-lg shadow-lg"
                 />
               </div>
             </div>
@@ -374,7 +403,7 @@ const StartScreen = ({
     );
   }
 
-  // Main screen - ENHANCED with Gen Alpha support and existing functionality
+  // Main screen - ENHANCED with Gen Alpha support, existing functionality, and Labubu
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
       isGenAlpha ? '' : isDarkMode ? 'bg-gray-900 text-white' : getGradientClass('blue-50', 'indigo-100')
@@ -382,27 +411,55 @@ const StartScreen = ({
       {/* Mobile-First Container - Yellow Box Area */}
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto pt-8 sm:pt-12">
-          {/* Header with Logo - ENHANCED */}
+          {/* Header with Logo and Labubu - ENHANCED */}
           <div className="text-center mb-8">
-            {/* Logo with enhanced background for all themes */}
+            {/* Logo and Labubu with enhanced background for all themes */}
             <div className="mb-6">
-              <div className={`inline-block p-3 rounded-full mb-4 shadow-lg transition-all duration-300 hover:scale-105 ${
-                isGenAlpha
-                  ? 'bg-white/15 backdrop-blur-xl border border-white/20'
-                  : isDarkMode 
-                  ? 'bg-gray-700/80 border border-gray-600' 
-                  : 'bg-white/90 border border-gray-200'
-              } backdrop-blur-sm`}>
-                <img 
-                  src={axcelLogo} 
-                  alt="Axcel Logo" 
-                  className="h-16 sm:h-20 w-auto transition-transform duration-300 hover:scale-105"
-                />
+              <div className="flex justify-center items-center gap-4 sm:gap-6 mb-4">
+                {/* Axcel Logo */}
+                <div className={`inline-block p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 ${
+                  isGenAlpha
+                    ? 'bg-white/15 backdrop-blur-xl border border-white/20'
+                    : isDarkMode 
+                    ? 'bg-gray-700/80 border border-gray-600' 
+                    : 'bg-white/90 border border-gray-200'
+                } backdrop-blur-sm`}>
+                  <img 
+                    src={axcelLogo} 
+                    alt="Axcel Logo" 
+                    className="h-16 sm:h-20 w-auto transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
+                
+                {/* Labubu GIF */}
+                <div className="relative">
+                  <img 
+                    src={labubuGif} 
+                    alt="Labubu" 
+                    className={`h-16 sm:h-20 w-auto rounded-lg shadow-lg transition-all duration-300 hover:scale-105 ${
+                      isGenAlpha
+                        ? 'ring-2 ring-white/30'
+                        : isDarkMode
+                        ? 'ring-2 ring-gray-600'
+                        : 'ring-2 ring-gray-200'
+                    }`}
+                  />
+                  {/* Optional cute floating badge */}
+                  <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                    isGenAlpha
+                      ? 'bg-pink-500/80 text-white backdrop-blur-sm'
+                      : isDarkMode
+                      ? 'bg-pink-600 text-white'
+                      : 'bg-pink-500 text-white'
+                  } shadow-lg`}>
+                    💖
+                  </div>
+                </div>
               </div>
             </div>
             
             <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${getTextClass('heading')}`}>
-              🎓 AI Tutor Quiz
+               AxcelScore Practice 
             </h1>
             <p className={`${getTextClass('body')} px-4 sm:px-0`}>
               Select a subject and question bank to begin your practice session
@@ -579,7 +636,7 @@ const StartScreen = ({
                             ? 'text-gray-600' 
                             : 'text-gray-400'
                         }`}>
-                          {isSelected ? '✅' : '☐'}
+                          {isSelected ? 'âœ…' : 'â˜'}
                         </div>
                       </div>
                     </button>

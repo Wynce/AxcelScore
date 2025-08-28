@@ -21,7 +21,7 @@
     "image_quality": 2.0,
     "enhancement_applied": true,
     "extraction_success": true,
-    "last_updated": "2025-08-26T12:18:41.969319",
+    "last_updated": "2025-08-28T13:06:40.649040",
     "model_used": "claude-sonnet-4-20250514",
     "quality_threshold": "91%",
     "processing_stats": {
@@ -34,6 +34,17 @@
         "total_tokens_used": 64391,
         "total_cost": 0.45501299999999983
       }
+    },
+    "ai_solver_version": "Hybrid Gen Alpha v2.0",
+    "solving_in_progress": true,
+    "progress_stats": {
+      "total_questions": 40,
+      "solved_questions": 40,
+      "completion_rate": 100.0,
+      "flagged_questions": 1,
+      "reviewed_questions": 0,
+      "high_confidence_questions": 37,
+      "average_confidence": 0.924
     }
   },
   "questions": [
@@ -52,29 +63,30 @@
       "marks": 1,
       "subject": "physics",
       "difficulty": "easy",
-      "correct_answer": "B",
-      "explanation": "The six balls span from 32 cm to 62 cm on the ruler, giving a total length of 30 cm. Since there are 6 identical balls, each ball has a diameter of 30 \u00f7 6 = 5 cm.",
+      "correct_answer": "A",
+      "explanation": "The six balls span from 38 cm to 62 cm on the ruler (24 cm total). Since the balls are identical and touching, each ball has a diameter of 24 cm \u00f7 6 = 4 cm.",
       "extraction_method": "enhanced_multi_strategy_detection",
       "detection_strategy": "standalone_number",
       "confidence": 0.9,
       "has_images": true,
       "extraction_focus": "web_interface_compatible",
       "detailed_explanation": {
-        "reasoning": "From the diagram, I can see that the six table-tennis balls are lined up between two wooden blocks. The metre ruler shows measurements at 32, 38, 62, and 65 cm. The balls appear to span from the 32 cm mark to the 62 cm mark on the ruler. This gives us the total length occupied by all six balls. Since the balls are identical and touching each other, the total length equals 6 times the diameter of one ball.",
-        "key_concepts": "Direct measurement using a ruler, understanding that identical spheres in contact have their centers separated by one diameter, basic division",
-        "common_mistakes": "Students might incorrectly use the wooden block measurements (38 to 65 cm) instead of the ball measurements, or might confuse radius with diameter"
+        "approach": "Measure the total length occupied by the six balls and divide by the number of balls",
+        "calculation": "Total length = 62 cm - 38 cm = 24 cm; Diameter per ball = 24 cm \u00f7 6 balls = 4 cm",
+        "reasoning": "The diagram shows six identical table-tennis balls lined up between two wooden blocks. The ruler measurements indicate the balls extend from the 38 cm mark to the 62 cm mark. Since the balls are identical and appear to be touching each other, the total distance they occupy divided by the number of balls gives the diameter of each individual ball.",
+        "conclusion": "Each ball has a diameter of 4 cm, which corresponds to option A"
       },
       "calculation_steps": [
-        "Step 1: Identify the span of the six balls on the ruler: from 32 cm to 62 cm",
-        "Step 2: Calculate total length: 62 - 32 = 30 cm",
-        "Step 3: Divide by number of balls: 30 cm \u00f7 6 balls = 5 cm per ball",
-        "Step 4: Since balls are touching, this length represents the diameter of one ball"
+        "Step 1: Identify the ruler readings at the start and end of the ball arrangement (38 cm and 62 cm)",
+        "Step 2: Calculate the total length occupied by all six balls: 62 - 38 = 24 cm",
+        "Step 3: Since the balls are identical and touching, divide the total length by the number of balls: 24 cm \u00f7 6 = 4 cm",
+        "Step 4: This gives the diameter of one ball as 4 cm"
       ],
-      "topic": "Measurement and Data Analysis",
-      "confidence_score": 0.98,
+      "topic": "Measurement and geometry",
+      "confidence_score": 0.95,
       "solved_by_ai": true,
       "needs_review": false,
-      "flag_reason": "",
+      "flag_reason": null,
       "solved_at": "2025-08-26T12:08:13.742577",
       "processing_time": 13.204481,
       "api_usage": {
@@ -83,7 +95,12 @@
         "cost": 0.010917,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": "",
+      "saved_at": "2025-08-28T13:00:35.282983",
+      "auto_flagged": false
     },
     {
       "id": "physics_q02",
@@ -134,7 +151,10 @@
         "cost": 0.014529,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q03",
@@ -181,7 +201,10 @@
         "cost": 0.009648,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q04",
@@ -228,7 +251,10 @@
         "cost": 0.009219000000000001,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q05",
@@ -277,7 +303,10 @@
         "cost": 0.011556,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q06",
@@ -325,7 +354,10 @@
         "cost": 0.015915,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q07",
@@ -372,7 +404,10 @@
         "cost": 0.00996,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q08",
@@ -420,7 +455,10 @@
         "cost": 0.014652,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q09",
@@ -468,7 +506,10 @@
         "cost": 0.012384,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q10",
@@ -515,7 +556,10 @@
         "cost": 0.009813,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q11",
@@ -563,7 +607,10 @@
         "cost": 0.010206,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q12",
@@ -610,7 +657,10 @@
         "cost": 0.01167,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q13",
@@ -658,7 +708,10 @@
         "cost": 0.010629,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q14",
@@ -705,7 +758,10 @@
         "cost": 0.009396,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q15",
@@ -753,7 +809,10 @@
         "cost": 0.009777000000000001,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q16",
@@ -801,7 +860,10 @@
         "cost": 0.013344,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q17",
@@ -848,7 +910,10 @@
         "cost": 0.009621,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q18",
@@ -895,7 +960,10 @@
         "cost": 0.011186999999999999,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q19",
@@ -912,29 +980,33 @@
       "marks": 1,
       "subject": "physics",
       "difficulty": "medium",
-      "correct_answer": "A",
-      "explanation": "Red light is deviated least by the prism so appears at position X, while violet light is deviated most and appears at position Y, with green appearing at the middle position Z.",
+      "correct_answer": "C",
+      "explanation": "Looking at the diagram geometry, the light beam enters from the lower left and the prism disperses it upward toward the wall. Violet light (shortest wavelength) refracts most and hits the wall at the top position X, green is in the middle at Z, and red (longest wavelength) refracts least and hits at the bottom position Y.",
       "extraction_method": "enhanced_multi_strategy_detection",
       "detection_strategy": "standalone_number",
       "confidence": 0.9,
       "has_images": true,
       "extraction_focus": "web_interface_compatible",
       "detailed_explanation": {
-        "reasoning": "When white light passes through a prism, it undergoes dispersion due to different wavelengths having different refractive indices. Red light has the longest wavelength and lowest refractive index, so it is deviated (bent) the least by the prism. Violet light has the shortest wavelength and highest refractive index, so it is deviated the most. Green light has intermediate properties and is deviated by a medium amount. Looking at the diagram, position X is closest to the original beam direction (least deviation), position Y is furthest from the original beam direction (most deviation), and position Z is in the middle (medium deviation). Therefore: X shows red light, Z shows green light, and Y shows violet light.",
-        "key_concepts": "Dispersion of light, refraction, wavelength dependence of refractive index, prism optics",
-        "common_mistakes": "Students often confuse which end of the spectrum is deviated more, or forget that red light is deviated least and violet light is deviated most through a prism"
+        "approach": "Carefully trace the light path through the prism based on the actual diagram geometry, then apply dispersion principles",
+        "calculation": "No calculations needed - this requires following the geometric ray paths and applying wavelength-dependent refraction",
+        "reasoning": "Examining the diagram carefully: the incident beam comes from the lower left, strikes the prism, and the dispersed light spreads upward toward the wall. The positions X, Z, Y are arranged vertically on the wall with X at the top, Z in the middle, and Y at the bottom. When light disperses through a prism, shorter wavelengths (violet) bend more than longer wavelengths (red). Following the geometry: the most refracted light (violet) will hit the wall at the highest position X, the moderately refracted light (green) hits at the middle position Z, and the least refracted light (red) hits at the lowest position Y.",
+        "conclusion": "Based on the actual diagram geometry and dispersion physics, violet appears at X, green at Z, and red at Y, making option C correct"
       },
       "calculation_steps": [
-        "Step 1: Identify that white light contains all colors with different wavelengths",
-        "Step 2: Apply principle that shorter wavelengths (violet) have higher refractive indices and are deviated more",
-        "Step 3: Apply principle that longer wavelengths (red) have lower refractive indices and are deviated less",
-        "Step 4: Match positions on wall with deviation amounts - X (least deviation) = red, Z (medium deviation) = green, Y (most deviation) = violet"
+        "Step 1: Examine the diagram geometry - light enters from lower left, positions X-Z-Y are arranged vertically",
+        "Step 2: Trace the light path through the prism - beam spreads upward after dispersion",
+        "Step 3: Apply dispersion principle - shorter wavelengths refract more than longer wavelengths",
+        "Step 4: Determine that violet (most refraction) reaches the top position X",
+        "Step 5: Determine that green (moderate refraction) reaches the middle position Z",
+        "Step 6: Determine that red (least refraction) reaches the bottom position Y",
+        "Step 7: Match the pattern violet-green-red (X-Z-Y) with option C"
       ],
-      "topic": "Optics - Dispersion and Refraction",
-      "confidence_score": 0.98,
+      "topic": "Light dispersion and refraction",
+      "confidence_score": 0.85,
       "solved_by_ai": true,
-      "needs_review": false,
-      "flag_reason": "",
+      "needs_review": true,
+      "flag_reason": "Low confidence: 85.0% (< 91%)",
       "solved_at": "2025-08-26T12:13:36.814227",
       "processing_time": 14.297867,
       "api_usage": {
@@ -943,7 +1015,12 @@
         "cost": 0.013245,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": "",
+      "saved_at": "2025-08-28T13:06:40.648994",
+      "auto_flagged": true
     },
     {
       "id": "physics_q20",
@@ -988,7 +1065,10 @@
         "cost": 0.008229,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q21",
@@ -1036,7 +1116,10 @@
         "cost": 0.011732999999999999,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q22",
@@ -1083,7 +1166,10 @@
         "cost": 0.010712999999999999,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q23",
@@ -1131,7 +1217,10 @@
         "cost": 0.011025,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q24",
@@ -1180,7 +1269,10 @@
         "cost": 0.009201,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q25",
@@ -1229,7 +1321,10 @@
         "cost": 0.012105,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q26",
@@ -1276,7 +1371,10 @@
         "cost": 0.009500999999999999,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q27",
@@ -1323,7 +1421,10 @@
         "cost": 0.009246,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q28",
@@ -1370,7 +1471,10 @@
         "cost": 0.010671,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q29",
@@ -1418,7 +1522,10 @@
         "cost": 0.013443,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q30",
@@ -1465,7 +1572,10 @@
         "cost": 0.012048,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q31",
@@ -1512,7 +1622,10 @@
         "cost": 0.013662,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q32",
@@ -1559,7 +1672,10 @@
         "cost": 0.011397000000000001,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q33",
@@ -1606,7 +1722,10 @@
         "cost": 0.009156000000000001,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q34",
@@ -1654,7 +1773,10 @@
         "cost": 0.009663,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q35",
@@ -1701,7 +1823,10 @@
         "cost": 0.007785,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q36",
@@ -1749,7 +1874,10 @@
         "cost": 0.012615,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q37",
@@ -1796,7 +1924,10 @@
         "cost": 0.009723,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q38",
@@ -1843,7 +1974,10 @@
         "cost": 0.009426,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q39",
@@ -1890,7 +2024,10 @@
         "cost": 0.01329,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     },
     {
       "id": "physics_q40",
@@ -1937,7 +2074,10 @@
         "cost": 0.011840999999999999,
         "model_used": "claude-sonnet-4-20250514"
       },
-      "model_used": "claude-sonnet-4-20250514"
+      "model_used": "claude-sonnet-4-20250514",
+      "manually_reviewed": false,
+      "reviewer_notes": "",
+      "review_timestamp": ""
     }
   ]
 }

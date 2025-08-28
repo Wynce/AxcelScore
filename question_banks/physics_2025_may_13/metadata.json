@@ -75,6 +75,36 @@
       "failures": [],
       "active_folder": "/Users/wynceaxcel/Apps/tutor-app/question_banks/physics_2025_may_13/images",
       "folder_type": "images"
+    },
+    {
+      "timestamp": "2025-08-28T12:56:33.481251",
+      "applied_count": 2,
+      "failed_count": 0,
+      "replacements": [
+        {
+          "question_number": 20,
+          "original_filename": "question_20_enhanced.png",
+          "backup_filename": "question_20_enhanced_backup_20250828_125633.png",
+          "new_file_size": 37273,
+          "dimensions": "1086x458",
+          "replacement_timestamp": "2025-08-28T12:56:33.459255",
+          "active_folder": "images",
+          "new_cache_buster": 1756356993459
+        },
+        {
+          "question_number": 35,
+          "original_filename": "question_35_enhanced.png",
+          "backup_filename": "question_35_enhanced_backup_20250828_125633.png",
+          "new_file_size": 48367,
+          "dimensions": "1092x472",
+          "replacement_timestamp": "2025-08-28T12:56:33.479890",
+          "active_folder": "images",
+          "new_cache_buster": 1756356993479
+        }
+      ],
+      "failures": [],
+      "active_folder": "/Users/wynceaxcel/Apps/axcelscore/question_banks/physics_2025_may_13/images",
+      "folder_type": "images"
     }
   ]
 }
