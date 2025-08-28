@@ -1,156 +1,93 @@
-# 🎯 AxcelScore
+# AxcelScore Quiz App
 
-**AI-Powered Question Bank Generator & Smart Tutoring Platform**
+A comprehensive React-based quiz application with multiple question banks, timer functionality, and detailed review system.
 
-AxcelScore transforms PDF exam papers into interactive question banks with AI-powered solving capabilities. Built for IGCSE, A-Levels, and similar educational assessments.
+## Features
 
-## ✨ Features
+- **Multi-Question Bank System**: Automatic discovery and selection of question banks
+- **Timer-Based Quizzes**: Both total quiz timer and per-question timers
+- **Three UI Themes**: Light, Dark, and Gen Alpha (animated gradient with glassmorphism)
+- **Comprehensive Review System**: Step-by-step solutions with detailed explanations
+- **Retest Functionality**: Focus on incorrect questions for targeted practice
+- **Performance Analytics**: Detailed result screens with scoring breakdown
 
-### 🔍 Smart PDF Processing
-- **Multi-Strategy Question Detection**: 7 different algorithms to identify questions
-- **High-Quality Image Extraction**: 2x resolution with enhancement
-- **Intelligent Boundary Detection**: Accurately separates questions and answers
+## Tech Stack
 
-### 🤖 AI Integration  
-- **Claude Sonnet 4**: Advanced reasoning for complex problems
-- **Step-by-Step Solutions**: Detailed explanations for learning
-- **Multiple Subject Support**: Physics, Chemistry, Biology, Mathematics, and more
+- React + Vite
+- CSS3 with advanced animations and glassmorphism effects
+- Question bank system with JSON data structure
+- Image support for questions and solutions
 
-### 🌐 Modern Web Interface
-- **Drag & Drop Upload**: Intuitive PDF processing
-- **Real-Time Progress**: Live extraction feedback
-- **Responsive Design**: Works on desktop and mobile
-- **Professional UI**: Clean, modern interface
+## Project Structure
 
-### 🚀 Production Ready
-- **Vercel Deployment**: Serverless hosting
-- **GitHub Integration**: Professional development workflow
-- **Standardized Structure**: Clean, maintainable codebase
-- **Comprehensive Testing**: Reliable extraction pipeline
-
-## 🛠️ Tech Stack
-
-**Frontend:**
-- React.js with modern hooks
-- Tailwind CSS for styling
-- Responsive design principles
-
-**Backend:** 
-- Python Flask API
-- PyMuPDF for PDF processing
-- PIL for image enhancement
-- Advanced NLP for question detection
-
-**AI/ML:**
-- Anthropic Claude API integration
-- Multi-modal processing (text + images)
-- Intelligent problem-solving algorithms
-
-**Deployment:**
-- Vercel for frontend hosting
-- GitHub for version control
-- Automated CI/CD pipeline
-
-## 📁 Project Structure
-
-```
 AxcelScore/
-├── frontend/              # React application
-├── backend/               # Python Flask API
-├── question_banks/        # Generated question banks
-├── docs/                  # Documentation
-├── README.md             # This file
-├── requirements.txt      # Python dependencies
-├── package.json          # Node.js dependencies
-└── vercel.json           # Deployment configuration
-```
+├── frontend/               # React frontend application
+│   ├── src/
+│   │   ├── components/
+│   │   ├── screens/
+│   │   ├── services/
+│   │   └── styles/
+│   ├── public/
+│   └── package.json
+├── backend/               # AI solver backend (Python)
+├── question_banks/        # Question data and images
+└── README.md
 
-## 🚀 Quick Start
+## Local Development Setup
 
 ### Prerequisites
-- Python 3.8+
-- Node.js 16+
+- Node.js (v16 or higher)
 - npm or yarn
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/AxcelScore.git
-   cd AxcelScore
-   ```
+1. Clone the repository:
+git clone https://github.com/Wynce/AxcelScore.git
+cd AxcelScore
 
-2. **Set up backend**
-   ```bash
-   pip install -r requirements.txt
-   ```
+2. Install frontend dependencies:
+cd frontend
+npm install
 
-3. **Set up frontend**
-   ```bash
-   cd frontend
-   npm install
-   npm run build
-   cd ..
-   ```
+3. Start development server:
+npm run dev
 
-4. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Add your API keys and configuration
-   ```
+## Deployment
 
-5. **Run the application**
-   ```bash
-   python backend/main.py
-   ```
+### Vercel Deployment (Frontend)
 
-## 🎯 Usage
+1. Navigate to frontend directory:
+cd frontend
 
-### PDF Processing
-1. Upload your PDF exam paper
-2. Select subject, year, and session
-3. Click "Extract Questions" 
-4. Get AI-generated question bank
+2. Deploy to Vercel:
+npm install -g vercel
+vercel --prod
 
-### AI Tutoring
-1. Browse extracted questions
-2. Get instant AI solutions
-3. Learn with step-by-step explanations
-4. Track your progress
+## Question Bank Structure
 
-## 📊 Supported Formats
+Place your question banks in the question_banks directory with this structure:
 
-- **Exam Boards**: Cambridge IGCSE, A-Levels, IB
-- **Subjects**: Physics, Chemistry, Biology, Mathematics, English, Economics
-- **File Types**: PDF (optimized for exam papers)
-- **Languages**: English (primary), with multi-language support planned
+question_banks/
+├── physics_2023_oct_13/
+│   ├── physics_2023_oct_13.json
+│   ├── solutions.json
+│   ├── metadata.json
+│   └── images/
+├── physics_2025_mar_13/
+└── physics_2025_may_13/
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create your feature branch (git checkout -b feature/AmazingFeature)
+3. Commit your changes (git commit -m 'Add some AmazingFeature')
+4. Push to the branch (git push origin feature/AmazingFeature)
+5. Open a Pull Request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
-## 🙏 Acknowledgments
+## Support
 
-- Anthropic for Claude API
-- Cambridge Assessment for educational standards
-- Open source community for amazing tools
-
-## 📞 Support
-
-- 📧 Email: support@axcelscore.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/AxcelScore/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/AxcelScore/discussions)
-
----
-
-**Made with ❤️ for educators and students worldwide**
+For support, email wynceaxcel@gmail.com or create an issue in the GitHub repository.
