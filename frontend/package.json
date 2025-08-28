@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run copy-question-banks && vite build",
+    "build:symlink": "vite build",
+    "copy-question-banks": "cp -r ../question_banks public/ || xcopy ..\\question_banks public\\question_banks\\ /E /I",
+    "clean-question-banks": "rm -rf public/question_banks",
+    "setup-symlink": "cd public && ln -sf ../../question_banks question_banks && echo 'Symlink created successfully'",
     "lint": "eslint .",
     "preview": "vite preview"
   },

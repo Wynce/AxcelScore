@@ -12,6 +12,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
+  transition: all 0.5s ease;
 }
 
 #root {
@@ -39,4 +40,345 @@ body {
 
 .input-field {
   @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200;
+}
+
+/* ================================
+   GEN ALPHA THEME SYSTEM 
+   ================================ */
+
+/* CSS Custom Properties for Dynamic Theming */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent-primary: #3b82f6;
+  
+  /* Animation variables for Gen Alpha theme */
+  --gradient-animation: gradientShift 8s ease infinite;
+  --shine-animation: shine 3s infinite;
+  --pulse-animation: genAlphaPulse 2s ease-in-out infinite;
+}
+
+/* Theme Classes */
+.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent-primary: #3b82f6;
+}
+
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --accent-primary: #3b82f6;
+}
+
+/* Gen Alpha Animated Background */
+.genalpha {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%) !important;
+  background-size: 400% 400% !important;
+}
+
+.genalpha-animated {
+  animation: var(--gradient-animation);
+}
+
+/* FIXED: Gen Alpha background class for Quiz and Result screens */
+.genalpha-background-debug {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%) !important;
+  background-size: 400% 400% !important;
+  animation: gradientShift 8s ease infinite !important;
+}
+
+/* Gen Alpha Keyframe Animations */
+@keyframes gradientShift {
+  0% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+  100% { 
+    background-position: 0% 50%; 
+  }
+}
+
+@keyframes shine {
+  0% { 
+    transform: translateX(-100%) translateY(-100%) rotate(45deg); 
+  }
+  100% { 
+    transform: translateX(100%) translateY(100%) rotate(45deg); 
+  }
+}
+
+@keyframes genAlphaPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes genAlphaGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 107, 107, 0.6), 0 0 40px rgba(76, 201, 196, 0.4);
+  }
+}
+
+/* Gen Alpha Button Styles */
+.genalpha-button {
+  background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%) !important;
+  position: relative;
+  overflow: hidden;
+  animation: genAlphaGlow 3s ease-in-out infinite;
+  color: white !important;
+  border: none !important;
+}
+
+.genalpha-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+  animation: var(--shine-animation);
+  pointer-events: none;
+}
+
+.genalpha-button:hover {
+  transform: translateY(-3px) scale(1.1) !important;
+  box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4) !important;
+}
+
+/* Gen Alpha Card Styles */
+.genalpha-card {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.genalpha-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
+  pointer-events: none;
+}
+
+/* Gen Alpha Timer Styles */
+.genalpha-timer {
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(15px) !important;
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  animation: var(--pulse-animation);
+}
+
+.genalpha-warning-total {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.9)) !important;
+  backdrop-filter: blur(15px) !important;
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.6) !important;
+}
+
+.genalpha-warning-question {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.8), rgba(245, 101, 101, 0.9)) !important;
+  backdrop-filter: blur(15px) !important;
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 0 30px rgba(251, 146, 60, 0.6) !important;
+}
+
+/* Gen Alpha Input Styles */
+.genalpha input,
+.genalpha textarea,
+.genalpha select {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+}
+
+.genalpha input::placeholder,
+.genalpha textarea::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.genalpha input:focus,
+.genalpha textarea:focus,
+.genalpha select:focus {
+  outline: none !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Gen Alpha Progress Bars */
+.genalpha .progress-bar {
+  background: linear-gradient(135deg, #56ab2f, #a8e6cf, #4ecdc4) !important;
+  box-shadow: 0 4px 15px rgba(86, 171, 47, 0.4) !important;
+  animation: genAlphaGlow 4s ease-in-out infinite;
+}
+
+/* Gen Alpha Scrollbar */
+.genalpha ::-webkit-scrollbar {
+  width: 12px;
+}
+
+.genalpha ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.genalpha ::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+  border-radius: 10px;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+.genalpha ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #ff5252, #26c6da);
+}
+
+/* Gen Alpha Text Effects */
+.genalpha h1,
+.genalpha h2,
+.genalpha h3,
+.genalpha h4,
+.genalpha h5,
+.genalpha h6 {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  color: white !important;
+}
+
+.genalpha .text-primary {
+  color: white !important;
+}
+
+.genalpha .text-secondary {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Gen Alpha Status Indicators */
+.genalpha .status-success {
+  background: linear-gradient(135deg, #56ab2f, #a8e6cf) !important;
+  box-shadow: 0 6px 20px rgba(86, 171, 47, 0.4) !important;
+}
+
+.genalpha .status-warning {
+  background: linear-gradient(135deg, #ffd700, #ffb347) !important;
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4) !important;
+  color: #333 !important;
+}
+
+.genalpha .status-error {
+  background: linear-gradient(135deg, #ff6b6b, #ffa07a) !important;
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important;
+}
+
+.genalpha .status-info {
+  background: linear-gradient(135deg, #00c6ff, #0072ff) !important;
+  box-shadow: 0 6px 20px rgba(0, 198, 255, 0.4) !important;
+}
+
+/* Gen Alpha Interactive Elements */
+.genalpha .interactive-element {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.genalpha .interactive-element:hover {
+  transform: translateY(-5px) scale(1.02) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Gen Alpha Loading Spinners */
+.genalpha .loading-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3) !important;
+  border-top: 4px solid white !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Gen Alpha Transitions */
+.genalpha * {
+  transition: all 0.3s ease !important;
+}
+
+/* Alpha Symbol Styling for Toggle Button */
+.genalpha .alpha-symbol,
+.alpha-symbol {
+  font-family: 'Times New Roman', serif;
+  font-size: 1.5em;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  display: inline-block;
+  animation: var(--pulse-animation);
+}
+
+/* Smooth theme transitions */
+body,
+.theme-transition {
+  transition: background-color 0.5s ease, color 0.5s ease !important;
+}
+
+/* Touch targets for mobile accessibility */
+button, [role="button"], input, select, textarea {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Responsive Gen Alpha Adjustments */
+@media (max-width: 768px) {
+  .genalpha-button {
+    animation: none;
+  }
+  
+  .genalpha-animated {
+    animation-duration: 12s;
+  }
+  
+  .genalpha .glass-effect {
+    backdrop-filter: blur(15px) !important;
+  }
+}
+
+/* Gen Alpha Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .genalpha-animated,
+  .genalpha-button,
+  .genalpha-timer {
+    animation: none !important;
+  }
+  
+  .genalpha * {
+    transition: none !important;
+  }
+}
+
+/* High Contrast Mode for Gen Alpha */
+@media (prefers-contrast: high) {
+  .genalpha {
+    --bg-primary: linear-gradient(135deg, #000080 0%, #4B0082 50%, #8B008B 100%) !important;
+  }
+  
+  .genalpha-card {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  }
 }

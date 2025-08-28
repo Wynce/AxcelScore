@@ -3,7 +3,7 @@
     "app_name": "Enhanced PDF Question Extractor",
     "exam_paper": "Cambridge IGCSE Physics Paper 13",
     "exam_session": "October/November 2023",
-    "extraction_date": "2025-08-25T21:15:49.385845",
+    "extraction_date": "2025-08-26T08:34:10.747450",
     "extraction_method": "Multi-Strategy Enhanced Detection",
     "total_questions": 40,
     "extraction_tool": "Enhanced PDF Extractor v2.0",

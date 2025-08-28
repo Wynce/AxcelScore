@@ -2,7 +2,7 @@
   "app_name": "Enhanced PDF Question Extractor",
   "exam_paper": "Cambridge IGCSE Physics Paper 13",
   "exam_session": "October/November 2023",
-  "extraction_date": "2025-08-25T21:15:49.385845",
+  "extraction_date": "2025-08-26T08:34:10.747450",
   "extraction_method": "Multi-Strategy Enhanced Detection",
   "total_questions": 40,
   "extraction_tool": "Enhanced PDF Extractor v2.0",
@@ -19,5 +19,47 @@
   "paper_code": "13",
   "image_quality": 2.0,
   "enhancement_applied": true,
-  "extraction_success": true
+  "extraction_success": true,
+  "image_replacements": [
+    {
+      "timestamp": "2025-08-26T08:35:35.534077",
+      "applied_count": 3,
+      "failed_count": 0,
+      "replacements": [
+        {
+          "question_number": 1,
+          "original_filename": "question_01_enhanced.png",
+          "backup_filename": "question_01_enhanced_backup_20250826_083535.png",
+          "new_file_size": 39412,
+          "dimensions": "1108x414",
+          "replacement_timestamp": "2025-08-26T08:35:35.496484",
+          "active_folder": "images",
+          "new_cache_buster": 1756168535496
+        },
+        {
+          "question_number": 3,
+          "original_filename": "question_03_enhanced.png",
+          "backup_filename": "question_03_enhanced_backup_20250826_083535.png",
+          "new_file_size": 25519,
+          "dimensions": "1062x238",
+          "replacement_timestamp": "2025-08-26T08:35:35.518973",
+          "active_folder": "images",
+          "new_cache_buster": 1756168535518
+        },
+        {
+          "question_number": 4,
+          "original_filename": "question_04_enhanced.png",
+          "backup_filename": "question_04_enhanced_backup_20250826_083535.png",
+          "new_file_size": 34112,
+          "dimensions": "1076x294",
+          "replacement_timestamp": "2025-08-26T08:35:35.533064",
+          "active_folder": "images",
+          "new_cache_buster": 1756168535533
+        }
+      ],
+      "failures": [],
+      "active_folder": "/Users/wynceaxcel/Apps/axcelscore/question_banks/physics_2023_oct_13/images",
+      "folder_type": "images"
+    }
+  ]
 }

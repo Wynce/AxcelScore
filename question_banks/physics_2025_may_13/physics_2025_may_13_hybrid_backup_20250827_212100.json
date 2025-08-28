@@ -1909,5 +1909,11 @@
       "needs_review": true,
       "flag_reason": "Low confidence: 90.0% (< 91%)"
     }
-  ]
+  ],
+  "export_info": {
+    "export_date": "2025-08-27T21:21:00.523069",
+    "format_version": "hybrid_gen_alpha_v2.0",
+    "export_type": "complete_backup",
+    "exported_from": "master_solutions_json"
+  }
 }

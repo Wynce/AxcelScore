@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Complete main.py - AI Tutor Interface with Enhanced AI Solver Integration
-Upload • Extract • Review • Solve workflow - COMPLETE VERSION WITH STANDARDIZED FOLDER STRUCTURE
+Complete main.py - AI Tutor Interface with Hybrid Solver Integration
+Upload • Extract • Review • Solve workflow - COMPLETE VERSION WITH HYBRID SOLVER
 """
 
-from flask import Flask, request, jsonify, send_from_directory, render_template_string, send_file, abort, make_response
+from flask import Flask, request, jsonify, send_from_directory, render_template_string, send_file, abort, make_response, redirect
 from flask_cors import CORS
 from PIL import Image
 import os
@@ -24,8 +24,14 @@ import atexit
 import traceback
 import hashlib
 
+# Allow importing hybrid.py from same directory
+sys.path.append(str(Path(__file__).parent))
+
 # Import the review module
 from review import ReviewManager, create_review_html_tab, get_review_css
+
+# Import the hybrid solver
+from hybrid import ScalableAISolverManager
 
 app = Flask(__name__)
 CORS(app)
@@ -43,6 +49,9 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 
 # Initialize Review Manager
 review_manager = ReviewManager(QUESTION_BANKS_DIR)
+
+# Initialize Hybrid Solver
+hybrid_solver = ScalableAISolverManager(QUESTION_BANKS_DIR)
 
 # Global variables to track current file and metadata
 CURRENT_FILE_PATH = None
@@ -76,7 +85,7 @@ class ModuleManager:
                 self.module_status['extractor']['path'] = path
                 break
                 
-        print(f"🔧 Extractor available: {'✅ Yes' if self.module_status['extractor']['available'] else '❌ No'}")
+        print(f"Extractor available: {'Yes' if self.module_status['extractor']['available'] else 'No'}")
     
     def run_extractor(self, pdf_path, exam_metadata):
         """
@@ -236,12 +245,12 @@ class SimpleAISolverManager:
             if images_folder.exists():
                 image_files = list(images_folder.glob("question_*_enhanced.png"))
                 images_dir = images_folder
-                print(f"📁 Found images in: {images_folder}")
+                print(f"Found images in: {images_folder}")
             # Check extracted_images folder as FALLBACK
             elif extracted_images_folder.exists():
                 image_files = list(extracted_images_folder.glob("question_*_enhanced.png"))
                 images_dir = extracted_images_folder
-                print(f"📁 Found images in: {extracted_images_folder}")
+                print(f"Found images in: {extracted_images_folder}")
             else:
                 return {
                     "success": False,
@@ -271,23 +280,14 @@ class SimpleAISolverManager:
             
             image_files.sort(key=extract_question_number)
             
-            # Generate AI solver interface HTML
-            interface_html = self.generate_simple_solver_interface(image_files, paper_path.name, metadata)
-            interface_path = paper_path / "ai_solver_interface.html"
-            
-            with open(interface_path, 'w', encoding='utf-8') as f:
-                f.write(interface_html)
-            
-            print(f"✅ AI Solver initialized for {paper_path.name}")
+            print(f"AI Solver initialized for {paper_path.name}")
             print(f"   Found {len(image_files)} questions")
-            print(f"   Interface saved: {interface_path}")
             
             return {
                 "success": True,
                 "data": {
                     "total_questions": len(image_files),
                     "paper_folder": paper_path.name,
-                    "interface_path": str(interface_path),
                     "subject": metadata.get('subject', 'Unknown'),
                     "year": metadata.get('year', 'Unknown'),
                     "month": metadata.get('month', 'Unknown'),
@@ -296,370 +296,21 @@ class SimpleAISolverManager:
             }
             
         except Exception as e:
-            print(f"❌ AI Solver error: {e}")
+            print(f"AI Solver error: {e}")
             import traceback
             traceback.print_exc()
             return {
                 "success": False,
                 "error": f"AI Solver initialization failed: {str(e)}"
             }
-    
-    def generate_simple_solver_interface(self, image_files, paper_name, metadata):
-        """Generate simple AI solver interface"""
-        
-        # Create question cards
-        question_cards = []
-        for i, img_file in enumerate(image_files, 1):
-            # Use Flask route for images
-            img_url = f"/images/{paper_name}/{img_file.name}"
-            
-            card_html = f'''
-            <div class="question-card" id="question-{i}">
-                <h3>Question {i}</h3>
-                <img src="{img_url}" alt="Question {i}" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('{img_url}')">
-                <div style="margin-top: 1rem;">
-                    <button onclick="getPrompt({i})" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
-                        📋 Get Prompt
-                    </button>
-                    <button onclick="window.open('{img_url}', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
-                        🔍 Open Image
-                    </button>
-                </div>
-                <div style="margin-top: 1rem;">
-                    <label style="font-weight: 600;">AI Response (JSON):</label>
-                    <textarea id="solution-{i}" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution({i})"></textarea>
-                    <div style="margin-top: 0.5rem;">
-                        <button onclick="saveSolution({i})" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
-                            ✅ Save
-                        </button>
-                        <button onclick="clearSolution({i})" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
-                            🗑️ Clear
-                        </button>
-                    </div>
-                </div>
-                <div id="solution-display-{i}" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
-            </div>
-            '''
-            question_cards.append(card_html)
-        
-        # Create HTML content using triple quotes instead of f-string to avoid brace conflicts
-        html_template = """<!DOCTYPE html>
-<html>
-<head>
-    <title>🤖 AI Solver - {paper_name}</title>
-    <style>
-        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }}
-        .container {{ max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }}
-        .header {{ background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 2rem; text-align: center; }}
-        .stats {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 2rem; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }}
-        .stat-card {{ background: white; padding: 1.5rem; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
-        .controls {{ text-align: center; margin: 2rem 0; padding: 0 2rem; }}
-        .questions-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem; padding: 2rem; }}
-        .question-card {{ background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #dee2e6; }}
-        .btn {{ padding: 0.75rem 1.5rem; margin: 0.5rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s; }}
-        .btn-primary {{ background: #007bff; color: white; }}
-        .btn-success {{ background: #28a745; color: white; }}
-        .btn-secondary {{ background: #6c757d; color: white; }}
-        .btn-enhanced {{ background: #8b5cf6; color: white; }}
-        .btn:hover {{ transform: translateY(-2px); }}
-        .modal {{ display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); }}
-        .modal-content {{ margin: 5% auto; display: block; max-width: 90%; max-height: 80%; }}
-        .close {{ position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; }}
-        .close:hover {{ color: #bbb; }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🤖 AI Solver Interface</h1>
-            <p>{subject} {year} {month} Paper {paper_code}</p>
-            <p>📊 {question_count} Questions Found</p>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <h3 id="total-questions">{question_count}</h3>
-                <p>Total Questions</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="solved-count">0</h3>
-                <p>Solved</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="flagged-count">0</h3>
-                <p>Flagged (&lt;85%)</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="avg-confidence">0%</h3>
-                <p>Avg Confidence</p>
-            </div>
-        </div>
-        
-        <div class="controls">
-            <button class="btn btn-enhanced" onclick="getAllPrompts()">📋 Get All Prompts</button>
-            <button class="btn btn-success" onclick="exportResults()">💾 Export Results</button>
-            <button class="btn btn-primary" onclick="window.open('https://claude.ai', '_blank')">🌐 Open Claude.ai</button>
-            <button class="btn btn-secondary" onclick="showInstructions()">❓ Instructions</button>
-        </div>
-        
-        <div class="questions-grid">
-            {question_cards}
-        </div>
-    </div>
-    
-    <!-- Image Modal -->
-    <div id="imageModal" class="modal">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <img class="modal-content" id="modalImage">
-    </div>
-    
-    <script>
-        const PROMPT = `Analyze this Cambridge IGCSE Physics question and provide a complete solution in JSON format.
-
-Return ONLY valid JSON in this exact structure:
-{prompt_structure}
-
-Important:
-- Be precise with calculations and units
-- Explain physics concepts clearly
-- For MCQ, explain why each wrong option is incorrect
-- Confidence score should be between 0.0 and 1.0`;
-
-        let solutions = {empty_object};
-        let stats = {stats_object};
-        
-        function getPrompt(questionNumber) {{
-            navigator.clipboard.writeText(PROMPT).then(() => {{
-                alert(`📋 Prompt copied for Question ${{questionNumber}}!\\n\\n1. Open Claude.ai in another tab\\n2. Upload the question image\\n3. Paste this prompt\\n4. Copy the JSON response back here`);
-            }}).catch(() => {{
-                alert(`Prompt for Question ${{questionNumber}}:\\n\\n${{PROMPT}}`);
-            }});
-        }}
-        
-        function getAllPrompts() {{
-            let allPrompts = "";
-            for(let i = 1; i <= stats.total; i++) {{
-                allPrompts += `=== QUESTION ${{i}} ===\\n${{PROMPT}}\\n\\n`;
-            }}
-            navigator.clipboard.writeText(allPrompts).then(() => {{
-                alert(`📋 All {question_count} prompts copied to clipboard!\\n\\nEach prompt is labeled with question number.`);
-            }}).catch(() => {{
-                console.error('Clipboard failed');
-                const newWindow = window.open('', '_blank');
-                newWindow.document.write(`<pre>${{allPrompts}}</pre>`);
-            }});
-        }}
-        
-        function validateSolution(questionNumber) {{
-            const textarea = document.getElementById(`solution-${{questionNumber}}`);
-            const solution = textarea.value.trim();
-            
-            if (!solution) {{
-                textarea.style.borderColor = '#ddd';
-                return;
-            }}
-            
-            try {{
-                const parsed = JSON.parse(solution);
-                textarea.style.borderColor = '#28a745';
-                return parsed;
-            }} catch(error) {{
-                textarea.style.borderColor = '#dc3545';
-                return null;
-            }}
-        }}
-        
-        function saveSolution(questionNumber) {{
-            const textarea = document.getElementById(`solution-${{questionNumber}}`);
-            const solution = textarea.value.trim();
-            
-            if(!solution) {{
-                alert('❌ No solution to save');
-                return;
-            }}
-            
-            try {{
-                const parsed = JSON.parse(solution);
-                
-                const required = ['correct_answer', 'simple_answer', 'confidence_score'];
-                const missing = required.filter(field => !(field in parsed));
-                if (missing.length > 0) {{
-                    throw new Error(`Missing required fields: ${{missing.join(', ')}}`);
-                }}
-                
-                const confidence = parseFloat(parsed.confidence_score);
-                if (isNaN(confidence) || confidence < 0 || confidence > 1) {{
-                    throw new Error('Confidence score must be between 0 and 1');
-                }}
-                
-                solutions[questionNumber] = parsed;
-                displaySolution(questionNumber, parsed);
-                updateStats();
-                alert(`✅ Solution saved for Question ${{questionNumber}}`);
-                
-            }} catch(error) {{
-                alert(`❌ Invalid JSON: ${{error.message}}`);
-            }}
-        }}
-        
-        function displaySolution(questionNumber, solution) {{
-            const displayDiv = document.getElementById(`solution-display-${{questionNumber}}`);
-            const confidence = parseFloat(solution.confidence_score);
-            const confidencePercent = Math.round(confidence * 100);
-            
-            displayDiv.innerHTML = `
-                <h5>✅ Solution Summary</h5>
-                <p><strong>Answer:</strong> ${{solution.correct_answer}}</p>
-                <p><strong>Explanation:</strong> ${{solution.simple_answer}}</p>
-                <p><strong>Topic:</strong> ${{solution.topic || 'Not specified'}}</p>
-                <p><strong>Confidence:</strong> ${{confidencePercent}}% ${{confidence < 0.85 ? '⚠️ FLAGGED' : '✅'}}</p>
-            `;
-            displayDiv.style.display = 'block';
-        }}
-        
-        function clearSolution(questionNumber) {{
-            if(confirm(`Clear solution for Question ${{questionNumber}}?`)) {{
-                document.getElementById(`solution-${{questionNumber}}`).value = '';
-                document.getElementById(`solution-display-${{questionNumber}}`).style.display = 'none';
-                delete solutions[questionNumber];
-                updateStats();
-            }}
-        }}
-        
-        function updateStats() {{
-            const solved = Object.keys(solutions).length;
-            const flagged = Object.values(solutions).filter(s => s.confidence_score < 0.85).length;
-            const totalConfidence = Object.values(solutions).reduce((sum, s) => sum + s.confidence_score, 0);
-            const avgConfidence = solved > 0 ? Math.round((totalConfidence / solved) * 100) : 0;
-            
-            document.getElementById('solved-count').textContent = solved;
-            document.getElementById('flagged-count').textContent = flagged;
-            document.getElementById('avg-confidence').textContent = avgConfidence + '%';
-        }}
-        
-        function exportResults() {{
-            if(Object.keys(solutions).length === 0) {{
-                alert('❌ No solutions to export');
-                return;
-            }}
-            
-            const exportData = {export_data_structure};
-            
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], {{type: 'application/json'}});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `{paper_name}_solutions_${{new Date().toISOString().slice(0, 19).replace(/:/g, '-')}}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            alert(`📥 Exported ${{Object.keys(solutions).length}} solutions to JSON file`);
-        }}
-        
-        function openFullSize(imageSrc) {{
-            const modal = document.getElementById('imageModal');
-            const modalImg = document.getElementById('modalImage');
-            modal.style.display = 'block';
-            modalImg.src = imageSrc;
-        }}
-        
-        function closeModal() {{
-            document.getElementById('imageModal').style.display = 'none';
-        }}
-        
-        function showInstructions() {{
-            alert(`🤖 AI Solver Instructions:
-
-1. 📋 GET PROMPTS:
-   • Click "Get Prompt" for individual questions
-   • Or "Get All Prompts" for batch processing
-
-2. 🌐 USE CLAUDE.AI:
-   • Open Claude.ai in another tab
-   • Upload the question image
-   • Paste the copied prompt
-   • Copy the JSON response
-
-3. 💾 SAVE SOLUTIONS:
-   • Paste JSON response in the textarea
-   • Click "Save" to validate and store
-   • Solutions auto-flagged if confidence < 85%
-
-4. 📥 EXPORT:
-   • Click "Export Results" for JSON file
-   • Contains all solutions + statistics
-
-Tips:
-• Keep this tab open while working with Claude.ai
-• Process questions in batches for efficiency
-• Review flagged solutions carefully`);
-        }}
-        
-        window.onclick = function(event) {{
-            const modal = document.getElementById('imageModal');
-            if (event.target === modal) {{
-                closeModal();
-            }}
-        }}
-        
-        console.log('🤖 AI Solver Interface ready with {question_count} questions');
-    </script>
-</body>
-</html>"""
-        
-        # Format the template with safe values
-        prompt_structure = '''{
-  "correct_answer": "A/B/C/D or calculated value",
-  "simple_answer": "Brief clear explanation",
-  "calculation_steps": ["Step 1: Identify given values", "Step 2: Apply formula", "Step 3: Calculate result"],
-  "detailed_explanation": {
-    "why_correct": "Detailed explanation of the correct approach and physics concepts",
-    "why_others_wrong": {"A": "Why option A is incorrect", "B": "Why option B is incorrect"}
-  },
-  "topic": "Physics topic (e.g., Motion and Forces)",
-  "difficulty": "easy/medium/hard",
-  "confidence_score": 0.95
-}'''
-        
-        empty_object = "{}"
-        stats_object = f"{{ total: {len(image_files)}, solved: 0, flagged: 0 }}"
-        export_data_structure = '''{
-                paper_name: "''' + paper_name + '''",
-                metadata: ''' + json.dumps(metadata) + ''',
-                solutions: solutions,
-                statistics: {
-                    completion_rate: Math.round((Object.keys(solutions).length / stats.total) * 100),
-                    average_confidence: Object.keys(solutions).length > 0 ? 
-                        Math.round((Object.values(solutions).reduce((sum, s) => sum + s.confidence_score, 0) / Object.keys(solutions).length) * 100) : 0,
-                    flagged_count: Object.values(solutions).filter(s => s.confidence_score < 0.85).length
-                },
-                export_timestamp: new Date().toISOString()
-            }'''
-        
-        # Replace placeholders
-        html_content = html_template.format(
-            paper_name=paper_name,
-            subject=metadata.get('subject', 'Physics'),
-            year=metadata.get('year', '2024'),
-            month=metadata.get('month', 'Mar'),
-            paper_code=metadata.get('paper_code', '13'),
-            question_count=len(image_files),
-            question_cards=''.join(question_cards),
-            prompt_structure=prompt_structure,
-            empty_object=empty_object,
-            stats_object=stats_object,
-            export_data_structure=export_data_structure
-        )
-        
-        return html_content
 
 # Initialize AI Solver Manager
 ai_solver_manager = SimpleAISolverManager()
 
-# AI SOLVER ROUTES
+# AI SOLVER ROUTES - Hybrid Integration
 @app.route('/api/ai-solver/initialize', methods=['POST'])
 def initialize_ai_solver():
-    """Initialize AI Solver - RETURNS JSON"""
+    """Initialize AI Solver - Now uses hybrid solver"""
     try:
         data = request.get_json()
         paper_folder = data.get('paper_folder')
@@ -670,15 +321,8 @@ def initialize_ai_solver():
                 "error": "No paper folder specified"
             }), 400
         
-        paper_folder_path = QUESTION_BANKS_DIR / paper_folder
-        
-        if not paper_folder_path.exists():
-            return jsonify({
-                "success": False,
-                "error": f"Paper folder not found: {paper_folder}"
-            }), 404
-        
-        result = ai_solver_manager.initialize_solver(str(paper_folder_path))
+        # Use hybrid solver instead of simple solver
+        result = hybrid_solver.initialize_solver(paper_folder)
         
         if result["success"]:
             return jsonify(result)
@@ -686,32 +330,64 @@ def initialize_ai_solver():
             return jsonify(result), 500
         
     except Exception as e:
-        print(f"❌ AI Solver initialization error: {str(e)}")
+        print(f"AI Solver initialization error: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)
         }), 500
 
+# HYBRID SOLVER ROUTES
+@app.route('/solver/<paper_folder>')
+def serve_hybrid_solver(paper_folder):
+    """Serve the hybrid manual solver interface"""
+    try:
+        result = hybrid_solver.generate_simplified_interface(paper_folder)
+        if result["success"]:
+            return result["html_content"]
+        else:
+            return f"Error: {result['error']}", 500
+    except Exception as e:
+        return f"Error creating interface: {str(e)}", 500
+
+@app.route('/api/save-solution', methods=['POST'])
+def save_solution():
+    """Save solution from hybrid solver"""
+    try:
+        data = request.get_json()
+        result = hybrid_solver.save_solution(
+            data.get('paper_folder'),
+            data.get('question_number'),
+            data.get('solution')
+        )
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/get-progress', methods=['POST'])
+def get_hybrid_progress():
+    """Get hybrid solver progress"""
+    try:
+        data = request.get_json()
+        result = hybrid_solver.get_progress(data.get('paper_folder'))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/export-solutions', methods=['POST'])
+def export_hybrid_solutions():
+    """Export solutions from hybrid solver"""
+    try:
+        data = request.get_json()
+        result = hybrid_solver.export_solutions(data.get('paper_folder'))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# Legacy route redirect for compatibility
 @app.route('/ai-solver/<paper_folder>')
 def serve_ai_solver_interface(paper_folder):
-    """Serve the AI solver interface HTML"""
-    try:
-        paper_folder_path = QUESTION_BANKS_DIR / paper_folder
-        interface_path = paper_folder_path / "ai_solver_interface.html"
-        
-        if not interface_path.exists():
-            result = ai_solver_manager.initialize_solver(str(paper_folder_path))
-            if not result["success"]:
-                return f"Failed to generate AI solver interface: {result['error']}", 500
-        
-        with open(interface_path, 'r', encoding='utf-8') as f:
-            html_content = f.read()
-        
-        return html_content
-        
-    except Exception as e:
-        print(f"❌ Error serving AI solver interface: {e}")
-        return f"Error serving AI solver interface: {str(e)}", 500
+    """Redirect to hybrid solver for compatibility"""
+    return redirect(f'/solver/{paper_folder}')
 
 def create_cache_busted_response(image_path):
     """Create a response with aggressive cache-busting headers"""
@@ -732,16 +408,16 @@ def create_cache_busted_response(image_path):
         return response
         
     except Exception as e:
-        print(f"❌ Error creating cache-busted response: {e}")
+        print(f"Error creating cache-busted response: {e}")
         abort(500)
 
-# Enhanced HTML template with fixed f-string syntax
+# Enhanced HTML template with fixed f-string syntax and updated solver URL
 HTML_TEMPLATE = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 AI Tutor - Upload, Extract, Review & Solve</title>
+    <title>AI Tutor - Upload, Extract, Review & Solve</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -973,26 +649,26 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 AI Tutor - Complete Workflow</h1>
+            <h1>AI Tutor - Complete Workflow</h1>
             <p>Upload, Extract, Review & Solve exam papers with AI-powered processing</p>
         </div>
 
         <div class="nav-tabs">
-            <button id="upload-tab-btn" class="nav-tab active" onclick="showTab('upload')">📤 Upload</button>
-            <button id="extract-tab-btn" class="nav-tab" onclick="showTab('extract')" disabled>⚙️ Extract</button>
-            <button id="review-tab-btn" class="nav-tab" onclick="showTab('review')" disabled>📝 Review</button>
-            <button id="solve-tab-btn" class="nav-tab" onclick="showTab('solve')" disabled>🤖 Solve</button>
+            <button id="upload-tab-btn" class="nav-tab active" onclick="showTab('upload')">Upload</button>
+            <button id="extract-tab-btn" class="nav-tab" onclick="showTab('extract')" disabled>Extract</button>
+            <button id="review-tab-btn" class="nav-tab" onclick="showTab('review')" disabled>Review</button>
+            <button id="solve-tab-btn" class="nav-tab" onclick="showTab('solve')" disabled>Solve</button>
         </div>
 
         <div class="tab-content">
             <!-- Upload Tab -->
             <div class="tab-pane active" id="upload-tab">
-                <h2>📤 Upload Exam PDF</h2>
+                <h2>Upload Exam PDF</h2>
                 <p style="margin-bottom: 2rem; color: #6c757d;">Upload a Cambridge IGCSE exam paper PDF for AI-powered processing</p>
 
                 <!-- Exam Information Form -->
                 <div class="file-info" style="display: block;">
-                    <h4>📋 Exam Information</h4>
+                    <h4>Exam Information</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Exam Type:</label>
@@ -1058,7 +734,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 
                 <!-- PDF File Upload -->
                 <div style="margin-top: 2rem;">
-                    <h4>📎 PDF File</h4>
+                    <h4>PDF File</h4>
                     <div id="upload-area" class="upload-area" onclick="document.getElementById('fileInput').click()">
                         <div style="font-size: 2.5rem; margin-bottom: 1rem;">📄</div>
                         <h3>Select a PDF file to upload</h3>
@@ -1069,25 +745,25 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 <input type="file" id="fileInput" accept=".pdf" style="display: none;">
                 
                 <div id="file-info" class="file-info hidden">
-                    <h4>📄 Selected File</h4>
+                    <h4>Selected File</h4>
                     <div id="file-details"></div>
                 </div>
                 
                 <div id="uploadStatus"></div>
                 
                 <button id="uploadBtn" class="btn" onclick="uploadFile()" disabled>
-                    📤 Upload PDF
+                    Upload PDF
                 </button>
             </div>
 
             <!-- Extract Tab -->
             <div class="tab-pane" id="extract-tab">
-                <h2>⚙️ Extract Questions</h2>
+                <h2>Extract Questions</h2>
                 <p style="margin-bottom: 2rem; color: #6c757d;">Extract individual questions from the uploaded exam paper</p>
 
                 <div id="extractStatus">
                     <div class="alert alert-info">
-                        <strong>📋 Extraction Process:</strong>
+                        <strong>Extraction Process:</strong>
                         <ol style="margin-top: 10px; margin-left: 20px; line-height: 1.6;">
                             <li><strong>Upload:</strong> PDF uploaded and ready for extraction</li>
                             <li><strong>AI Analysis:</strong> Automatic page structure analysis</li>
@@ -1099,11 +775,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 </div>
 
                 <button id="extractBtn" class="btn" onclick="extractQuestions()" disabled>
-                    ⚙️ Extract Questions
+                    Extract Questions
                 </button>
 
                 <div id="extractProgress" class="hidden">
-                    <h4>📄 Extraction in Progress</h4>
+                    <h4>Extraction in Progress</h4>
                     <div class="progress">
                         <div id="extractProgressBar" class="progress-bar" style="width: 0%">0%</div>
                     </div>
@@ -1117,8 +793,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 
             <!-- Solve Tab -->
             <div class="tab-pane" id="solve-tab">
-                <h2>🤖 Enhanced AI Solving</h2>
-                <p style="margin-bottom: 2rem; color: #6c757d;">Enhanced manual solving with batch processing and quality control</p>
+                <h2>Hybrid AI Solving</h2>
+                <p style="margin-bottom: 2rem; color: #6c757d;">Enhanced manual solving with colorful interface and quality control</p>
 
                 <div class="solve-features">
                     <div class="feature-card">
@@ -1137,28 +813,29 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                         <p>Real-time solving statistics and completion tracking</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon">🚀</div>
-                        <h4>Enhanced Interface</h4>
-                        <p>Optimized workflow for Cambridge IGCSE Physics questions</p>
+                        <div class="feature-icon">🎨</div>
+                        <h4>Colorful Interface</h4>
+                        <p>Gen Alpha design with animated gradients and modern UI</p>
                     </div>
                 </div>
 
                 <div id="solveStatus">
                     <div class="alert alert-info">
-                        <strong>🤖 Enhanced Solving Features:</strong>
+                        <strong>Hybrid Solving Features:</strong>
                         <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Animated Interface:</strong> Colorful gradient backgrounds with smooth animations</li>
                             <li><strong>Batch Prompts:</strong> Copy all standardized prompts at once</li>
                             <li><strong>Quality Control:</strong> Auto-flagging below 85% confidence</li>
                             <li><strong>Progress Tracking:</strong> Real-time solving statistics</li>
-                            <li><strong>Smart Export:</strong> Standardized JSON with quality metrics</li>
+                            <li><strong>Smart Export:</strong> Comprehensive JSON backup with quality metrics</li>
                             <li><strong>Enhanced Prompts:</strong> Optimized for Cambridge IGCSE Physics</li>
                         </ul>
                     </div>
                 </div>
 
                 <div class="solver-controls">
-                    <button id="launchSolverBtn" class="btn enhanced" onclick="launchEnhancedSolver()" disabled>
-                        🚀 Launch AI Solver
+                    <button id="launchSolverBtn" class="btn enhanced" onclick="launchHybridSolver()" disabled>
+                        🚀 Launch Hybrid Solver
                     </button>
                     <button class="btn secondary" onclick="openClaudeAI()">
                         🌐 Open Claude.ai
@@ -1169,11 +846,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 </div>
 
                 <div id="solverProgress" class="hidden">
-                    <h4>📄 Initializing Enhanced Solver</h4>
+                    <h4>Initializing Hybrid Solver</h4>
                     <div class="progress">
                         <div id="solverProgressBar" class="progress-bar" style="width: 0%">0%</div>
                     </div>
-                    <p id="solverProgressText">Preparing solving interface...</p>
+                    <p id="solverProgressText">Preparing hybrid interface...</p>
                 </div>
             </div>
         </div>
@@ -1408,7 +1085,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                                         🚀 Go Directly to Solve
                                     </button>
                                     <button class="btn" onclick="showTab('review')" style="margin: 0.5rem 0;">
-                                        📝 Review Images First
+                                        🔍 Review Images First
                                     </button>
                                     <p style="margin-top: 1rem; font-size: 12px; color: #6c757d;">Both tabs are now enabled!</p>
                                 </div>
@@ -1467,8 +1144,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             document.getElementById('launchSolverBtn').disabled = false;
         }
 
-        // Enhanced Solver Functions - UPDATED API ENDPOINT
-        function launchEnhancedSolver() {
+        // Hybrid Solver Functions - UPDATED to use /solver/ endpoint
+        function launchHybridSolver() {
             if (!currentPaperFolder) {
                 showAlert('solveStatus', 'error', 'No paper folder available. Please extract questions first.');
                 return;
@@ -1477,10 +1154,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             const progressDiv = document.getElementById('solverProgress');
             progressDiv.classList.remove('hidden');
             
-            document.getElementById('solverProgressText').textContent = 'Initializing enhanced solver...';
+            document.getElementById('solverProgressText').textContent = 'Initializing hybrid solver...';
             document.getElementById('solverProgressBar').style.width = '30%';
             
-            // Initialize enhanced solver - CORRECTED ENDPOINT
+            // Initialize hybrid solver 
             fetch('/api/ai-solver/initialize', {
                 method: 'POST',
                 headers: {
@@ -1495,14 +1172,14 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 if (data.success) {
                     document.getElementById('solverProgressBar').style.width = '100%';
                     document.getElementById('solverProgressText').textContent = 
-                        `✅ Enhanced solver ready! Found ${data.data.total_questions} questions.`;
+                        `✅ Hybrid solver ready! Found ${data.data.total_questions} questions.`;
                     
-                    // Open enhanced solver in new tab
-                    const solverUrl = `/ai-solver/${currentPaperFolder}`;
+                    // Open hybrid solver in new tab using /solver/ endpoint
+                    const solverUrl = `/solver/${currentPaperFolder}`;
                     window.open(solverUrl, '_blank', 'width=1600,height=1000');
                     
                     showAlert('solveStatus', 'success', 
-                        `🚀 Enhanced AI Solver launched for ${data.data.subject} ${data.data.year} ${data.data.month} Paper ${data.data.paper_code}`);
+                        `🚀 Hybrid AI Solver launched with colorful interface for ${data.data.subject} ${data.data.year} ${data.data.month} Paper ${data.data.paper_code}`);
                     
                     setTimeout(() => {
                         progressDiv.classList.add('hidden');
@@ -1523,10 +1200,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
 
         function showSolverHelp() {
-            alert(`🤖 Enhanced AI Solver Help
+            alert(`🤖 Hybrid AI Solver Help
 
-1. 🚀 Launch Enhanced Solver
-   • Opens a new tab with the solving interface
+1. 🚀 Launch Hybrid Solver
+   • Opens a new tab with colorful animated interface
+   • Gen Alpha design with gradient backgrounds
    • Shows all extracted questions with images
 
 2. 📋 Batch Processing
@@ -1544,13 +1222,14 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
    • Validation checks for JSON format
 
 5. 📥 Export Results
-   • Export standardized JSON with quality metrics
+   • Export comprehensive JSON backup with quality metrics
    • Compatible with review system
 
 Tips:
 • Keep the solver tab open while working
 • Process questions in batches for efficiency
-• Review flagged solutions carefully`);
+• Review flagged solutions carefully
+• Enjoy the colorful animated interface!`);
         }
 
         // Auto-load images when switching to review tab (simplified version)
@@ -1792,7 +1471,7 @@ Tips:
             previewDiv.classList.remove('active');
             
             showAlert('reviewStatus', 'info', 
-                `✅ Replacement for Question ${questionNumber} confirmed. Click "Update All Changes" to apply.`);
+                `Replacement for Question ${questionNumber} confirmed. Click "Update All Changes" to apply.`);
         }
 
         function cancelReplacement(questionNumber) {
@@ -1862,7 +1541,7 @@ Tips:
                     updatePendingCount();
                     
                     showAlert('reviewStatus', 'success', 
-                        `🎉 Successfully updated ${data.applied_count} images!\\nBackups saved to: backup_images folder`);
+                        `Successfully updated ${data.applied_count} images! Backups saved to: backup_images folder`);
                     
                     // Enable solve tab after successful review completion
                     enableSolveAfterReview();
@@ -1872,15 +1551,15 @@ Tips:
                         forceReloadImages();
                     }, 1000);
                 } else {
-                    showAlert('reviewStatus', 'error', `❌ Failed to update images: ${data.error}`);
+                    showAlert('reviewStatus', 'error', `Failed to update images: ${data.error}`);
                 }
             })
             .catch(error => {
-                showAlert('reviewStatus', 'error', `❌ Error updating images: ${error.message}`);
+                showAlert('reviewStatus', 'error', `Error updating images: ${error.message}`);
             })
             .finally(() => {
                 updateBtn.disabled = false;
-                updateBtn.innerHTML = '💾 Update All Changes';
+                updateBtn.innerHTML = 'Update All Changes';
             });
         }
 
@@ -1910,7 +1589,7 @@ Tips:
                     });
                     
                     showAlert('reviewStatus', 'success', 
-                        `✅ Images refreshed successfully! Updated images should now be visible.`);
+                        `Images refreshed successfully! Updated images should now be visible.`);
                 }
             })
             .catch(error => {
@@ -1950,13 +1629,13 @@ Tips:
                     updatePendingCount();
                     
                     showAlert('reviewStatus', 'success', 
-                        `✅ Reset ${data.cleared_count} pending replacements`);
+                        `Reset ${data.cleared_count} pending replacements`);
                 } else {
-                    showAlert('reviewStatus', 'error', `❌ Failed to reset: ${data.error}`);
+                    showAlert('reviewStatus', 'error', `Failed to reset: ${data.error}`);
                 }
             })
             .catch(error => {
-                showAlert('reviewStatus', 'error', `❌ Error resetting: ${error.message}`);
+                showAlert('reviewStatus', 'error', `Error resetting: ${error.message}`);
             });
         }
 
@@ -1966,14 +1645,14 @@ Tips:
 
         function goToSolve() {
             const confirmGo = confirm(
-                `🚀 Go to Solve Tab?\\n\\nThis will:\\n• Keep current images as-is\\n• Enable the Solve tab\\n• Switch to Solve tab\\n\\nContinue?`
+                `Go to Solve Tab?\\n\\nThis will:\\n• Keep current images as-is\\n• Enable the Solve tab\\n• Switch to Solve tab\\n\\nContinue?`
             );
             
             if (confirmGo) {
                 enableSolveTab();
                 showTab('solve');
                 showAlert('reviewStatus', 'info', 
-                    '🚀 Moved to Solve tab. Images ready for processing. You can return to Review anytime.');
+                    'Moved to Solve tab. Images ready for processing. You can return to Review anytime.');
             }
         }
 
@@ -2035,7 +1714,7 @@ Tips:
                     const event = new Event('change', { bubbles: true });
                     document.getElementById('fileInput').dispatchEvent(event);
                 } else {
-                    showAlert('uploadStatus', 'error', '❌ Please drop a PDF file only.');
+                    showAlert('uploadStatus', 'error', 'Please drop a PDF file only.');
                 }
             }
         }
@@ -2055,7 +1734,7 @@ Tips:
                             document.getElementById('extract-tab-btn').disabled = false;
                             enableReviewAndSolve();
                             
-                            showAlert('uploadStatus', 'info', `✅ Found existing question bank: ${lastBank.folder_name} with ${lastBank.image_count} questions. Both Review and Solve tabs are now available!`);
+                            showAlert('uploadStatus', 'info', `Found existing question bank: ${lastBank.folder_name} with ${lastBank.image_count} questions. Both Review and Solve tabs are now available!`);
                         }
                     }
                 })
@@ -2149,7 +1828,7 @@ def get_status():
         return jsonify(status_data)
         
     except Exception as e:
-        print(f"❌ Status check error: {e}")
+        print(f"Status check error: {e}")
         return jsonify({
             "status": "error",
             "error": str(e),
@@ -2196,7 +1875,7 @@ def check_paper_exists():
             })
             
     except Exception as e:
-        print(f"❌ Error checking paper existence: {e}")
+        print(f"Error checking paper existence: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/upload', methods=['POST'])
@@ -2228,7 +1907,7 @@ def upload_pdf():
                 metadata_str = request.form['metadata']
                 exam_metadata.update(json.loads(metadata_str))
             except Exception as e:
-                print(f"⚠️ WARNING: Failed to parse metadata: {e}")
+                print(f"WARNING: Failed to parse metadata: {e}")
         
         CURRENT_EXAM_METADATA = exam_metadata
         
@@ -2275,7 +1954,7 @@ def upload_pdf():
         with open(base_metadata_path, 'w') as f:
             json.dump(exam_metadata, f, indent=2)
         
-        print(f"✅ PDF uploaded successfully")
+        print(f"PDF uploaded successfully")
         print(f"   Paper folder: {paper_folder_path}")
         print(f"   Metadata: {exam_metadata}")
         
@@ -2290,7 +1969,7 @@ def upload_pdf():
         })
         
     except Exception as e:
-        print(f"❌ Upload error: {e}")
+        print(f"Upload error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/extract', methods=['POST'])
@@ -2334,7 +2013,7 @@ def extract_questions():
         })
         
     except Exception as e:
-        print(f"❌ Extraction error: {e}")
+        print(f"Extraction error: {e}")
         return jsonify({
             "success": False,
             "error": f"Extraction failed: {str(e)}"
@@ -2448,7 +2127,7 @@ def export_results():
         else:
             return jsonify({
                 "success": False,
-                "error": "No export files found. Please solve questions first using the Enhanced AI Solver."
+                "error": "No export files found. Please solve questions first using the Hybrid AI Solver."
             }), 404
             
     except Exception as e:
@@ -2467,15 +2146,16 @@ def cleanup():
 atexit.register(cleanup)
 
 if __name__ == '__main__':
-    print("🚀 Starting AI Tutor - Complete Workflow...")
+    print("Starting AI Tutor - Complete Workflow with Hybrid Solver...")
     print("=" * 70)
-    print(f"📂 Backend directory: {BASE_DIR}")
-    print(f"📂 Tutor App root: {TUTOR_APP_ROOT}")
-    print(f"📂 Upload folder: {UPLOAD_FOLDER}")
-    print(f"📂 Question banks (shared): {QUESTION_BANKS_DIR}")
-    print(f"🔧 Extractor available: {'✅ Yes' if module_manager.module_status['extractor']['available'] else '❌ No'}")
-    print(f"📝 Review System: ✅ Integrated")
-    print(f"🌐 Web interface: http://localhost:5004")
+    print(f"Backend directory: {BASE_DIR}")
+    print(f"Tutor App root: {TUTOR_APP_ROOT}")
+    print(f"Upload folder: {UPLOAD_FOLDER}")
+    print(f"Question banks (shared): {QUESTION_BANKS_DIR}")
+    print(f"Extractor available: {'Yes' if module_manager.module_status['extractor']['available'] else 'No'}")
+    print(f"Review System: Integrated")
+    print(f"Hybrid Solver: Integrated with Gen Alpha interface")
+    print(f"Web interface: http://localhost:5004")
     print("=" * 70)
     
     # Ensure directories exist

@@ -1,5 +1,5 @@
 // ==============================
-// 🔍 services/questionService.js - TRULY SCALABLE AUTO-DISCOVERY
+// 📁 services/questionService.js - TRULY SCALABLE AUTO-DISCOVERY
 // ==============================
 
 let cachedBanks = null;
@@ -26,7 +26,7 @@ async function autoDiscoverAllQuestionBanks() {
         }
       }
     } catch (e) {
-      console.log('📁 No registry found, using pattern scanning...');
+      console.log('📂 No registry found, using pattern scanning...');
     }
     
     // Step 2: If no registry, use pattern-based discovery
@@ -291,7 +291,7 @@ export const discoverQuestionBanks = async () => {
 };
 
 /**
- * SOLUTION MATCHING - Critical for random questions
+ * ENHANCED SOLUTION MATCHING - Fixed for detailed explanations
  */
 export const loadQuestionsWithSolutionMatching = async (bankId) => {
   console.log(`📚 Loading questions with solution matching: ${bankId}`);
@@ -311,21 +311,31 @@ export const loadQuestionsWithSolutionMatching = async (bankId) => {
     }
     const questionData = await questionResponse.json();
     
-    // Load solutions data (AI Solver export)
+    // Load solutions data (AI Solver export) - ENHANCED ERROR HANDLING
     let solutionsData = null;
     try {
       const solutionsResponse = await fetch(`/question_banks/${bankId}/solutions.json`);
       if (solutionsResponse.ok) {
         solutionsData = await solutionsResponse.json();
-        console.log('✅ Solutions data loaded for answer matching');
+        console.log(`✅ Solutions data loaded: ${Object.keys(solutionsData).length} entries`);
+        
+        // Debug: Log first solution entry structure
+        const firstKey = Object.keys(solutionsData)[0];
+        if (firstKey) {
+          console.log('📋 First solution structure:', {
+            key: firstKey,
+            hasDetailedExplanation: !!solutionsData[firstKey].detailed_explanation,
+            explanationKeys: solutionsData[firstKey].detailed_explanation ? Object.keys(solutionsData[firstKey].detailed_explanation) : []
+          });
+        }
       }
     } catch (e) {
       console.warn('⚠️ No solutions.json found - using question data for answers');
     }
     
-    // Process and match questions with solutions
+    // Process and match questions with solutions - ENHANCED MATCHING
     const questions = processQuestionsData(questionData);
-    const matchedQuestions = matchQuestionsWithSolutions(questions, solutionsData);
+    const matchedQuestions = matchQuestionsWithSolutions(questions, solutionsData, bankId);
     
     // Validate the matching
     const validation = validateQuestionSolutionMatch(matchedQuestions);
@@ -335,6 +345,11 @@ export const loadQuestionsWithSolutionMatching = async (bankId) => {
     }
     
     console.log(`✅ Loaded ${matchedQuestions.length} questions with ${validation.matchedCount} solution matches`);
+    
+    // Debug: Log detailed explanation availability
+    const withExplanations = matchedQuestions.filter(q => q.detailed_explanation && Object.keys(q.detailed_explanation).length > 0).length;
+    console.log(`📖 Questions with detailed explanations: ${withExplanations}/${matchedQuestions.length}`);
+    
     return matchedQuestions;
     
   } catch (error) {
@@ -344,35 +359,69 @@ export const loadQuestionsWithSolutionMatching = async (bankId) => {
 };
 
 /**
- * Match questions with their solutions
+ * ENHANCED: Match questions with their solutions
  */
-function matchQuestionsWithSolutions(questions, solutionsData) {
+function matchQuestionsWithSolutions(questions, solutionsData, bankId) {
   if (!solutionsData) {
+    console.warn('⚠️ No solutions data available, using question data only');
     return questions; // Use questions as-is if no separate solutions
   }
   
-  return questions.map(question => {
+  console.log(`🔄 Matching ${questions.length} questions with solutions data...`);
+  
+  return questions.map((question, index) => {
     const questionNum = extractQuestionNumber(question.id);
     const solutionKey = findSolutionKey(questionNum, solutionsData);
     
     if (solutionKey && solutionsData[solutionKey]) {
       const solution = solutionsData[solutionKey];
       
-      return {
+      // ENHANCED: Better merging of detailed explanations
+      let mergedDetailedExplanation = {};
+      
+      // Merge existing detailed explanation from question
+      if (question.detailed_explanation && typeof question.detailed_explanation === 'object') {
+        mergedDetailedExplanation = { ...question.detailed_explanation };
+      }
+      
+      // Override/merge with solution detailed explanation
+      if (solution.detailed_explanation && typeof solution.detailed_explanation === 'object') {
+        mergedDetailedExplanation = { 
+          ...mergedDetailedExplanation, 
+          ...solution.detailed_explanation 
+        };
+        
+        // Debug log for detailed explanation merging
+        console.log(`📋 Question ${questionNum}: Merged detailed explanation with keys:`, Object.keys(mergedDetailedExplanation));
+      }
+      
+      const matchedQuestion = {
         ...question,
+        // Add bankId to question for image path generation
+        bankId: bankId,
         // Override with solution data if available
         correct_answer: solution.correct_answer || question.correct_answer,
         simple_answer: solution.simple_answer || question.simple_answer,
         calculation_steps: solution.calculation_steps || question.calculation_steps,
-        detailed_explanation: solution.detailed_explanation || question.detailed_explanation,
+        detailed_explanation: mergedDetailedExplanation,
         confidence_score: solution.confidence_score || question.confidence_score,
         solution_matched: true,
         solution_source: 'ai_solver'
       };
+      
+      // Debug: Log successful match
+      if (Object.keys(mergedDetailedExplanation).length > 0) {
+        console.log(`✅ Question ${questionNum}: Detailed explanation merged successfully`);
+      }
+      
+      return matchedQuestion;
     }
     
+    // No solution found - still add bankId
+    console.log(`⚠️ Question ${questionNum}: No solution match found`);
     return {
       ...question,
+      bankId: bankId, // Important: Add bankId even if no solution matched
       solution_matched: false,
       solution_source: 'question_data'
     };
@@ -390,25 +439,30 @@ function extractQuestionNumber(questionId) {
 }
 
 /**
- * Find corresponding solution key for question number
+ * ENHANCED: Find corresponding solution key for question number
  */
 function findSolutionKey(questionNum, solutionsData) {
   if (!questionNum || !solutionsData) return null;
   
-  // Try different key formats
+  // Try different key formats - EXPANDED LIST
   const possibleKeys = [
     questionNum.toString(),
     `q${questionNum}`,
     `question_${questionNum}`,
-    `${questionNum}`
+    `${questionNum}`,
+    `Question ${questionNum}`,
+    `Q${questionNum}`,
+    `question${questionNum}`
   ];
   
   for (const key of possibleKeys) {
     if (solutionsData[key]) {
+      console.log(`🎯 Found solution key '${key}' for question ${questionNum}`);
       return key;
     }
   }
   
+  console.warn(`⚠️ No solution key found for question ${questionNum}. Available keys:`, Object.keys(solutionsData).slice(0, 5));
   return null;
 }
 
@@ -590,7 +644,7 @@ export const validateQuestionBankStructure = async (bankId) => {
 };
 
 export const quickHealthCheck = async (bankId) => {
-  console.log(`🏥 Health check for: ${bankId}`);
+  console.log(`🩺 Health check for: ${bankId}`);
   
   try {
     const start = performance.now();
@@ -609,7 +663,7 @@ export const quickHealthCheck = async (bankId) => {
     
     console.log(`✅ Health Check Complete:
     📊 Questions: ${health.questionCount}
-    ⏱️ Load Time: ${health.loadTime}
+    ⱶ️ Load Time: ${health.loadTime}
     🖼️ Images: ${health.hasImages}
     🎯 Solutions: ${health.solutionMatches}`);
     
