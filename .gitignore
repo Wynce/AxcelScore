@@ -116,3 +116,4 @@ backups/
 archive/
 *.backup
 *.bak
+.vercel
