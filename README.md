@@ -91,3 +91,4 @@ This project is licensed under the MIT License.
 ## Support
 
 For support, email wynceaxcel@gmail.com or create an issue in the GitHub repository.
+Updated build script
