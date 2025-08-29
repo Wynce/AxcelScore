@@ -31,7 +31,7 @@ import io
 import hashlib
 
 # Configuration
-QUESTION_BANKS_DIR = Path("../question_banks")  # Go up one level from backend folder
+QUESTION_BANKS_DIR = Path("../frontend/public/question_banks")  # Go up one level from backend folder
 QUESTION_BANKS_DIR.mkdir(exist_ok=True)
 CONFIDENCE_THRESHOLD = 0.91  # 91% quality threshold
 
@@ -40,7 +40,7 @@ app = Flask(__name__)
 
 def get_claude_prompt_template(subject, question_num):
     """Generate enhanced Claude prompt template"""
-    return f"""Please analyze this {subject.lower()} question image carefully and provide a complete solution in JSON format. Double check your reading of all values before proceeding as accuracy for exam is more important than speed.
+    return f"""Please analyze this {subject.lower()} question image carefully and provide a complete solution in JSON format. Double check your reading of all values before proceeding as accuracy for exam is more important than speed. Before applying any physics principles, carefully examine the exact geometry and positioning shown in the diagram, ensuring distances are measured from correct reference points and segments are interpreted as additive or separate measurements as appropriate. Before applying any physics principles, carefully examine the exact geometry and positioning shown in the diagram.
 
 Required JSON structure:
 {{
@@ -603,7 +603,7 @@ let currentFilter = 'all';
 
 // Utility functions
 function getPromptTemplate(questionNum) {{
-    return `Please analyze this ${{subject.toLowerCase()}} question image carefully and provide a complete solution in JSON format. Double check your reading of all values before proceeding as accuracy for exam is more important than speed.
+    return `Please analyze this ${{subject.toLowerCase()}} question image carefully and provide a complete solution in JSON format. Double check your reading of all values before proceeding as accuracy for exam is more important than speed. Before applying any physics principles, carefully examine the exact geometry and positioning shown in the diagram, ensuring distances are measured from correct reference points and segments are interpreted as additive or separate measurements as appropriate.
 
 Required JSON structure:
 {{

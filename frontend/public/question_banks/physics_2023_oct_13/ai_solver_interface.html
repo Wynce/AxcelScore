@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🤖 AI Solver - physics_2023_oct_13</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 2rem; text-align: center; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 2rem; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .controls { text-align: center; margin: 2rem 0; padding: 0 2rem; }
+        .questions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem; padding: 2rem; }
+        .question-card { background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #dee2e6; }
+        .btn { padding: 0.75rem 1.5rem; margin: 0.5rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-enhanced { background: #8b5cf6; color: white; }
+        .btn:hover { transform: translateY(-2px); }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); }
+        .modal-content { margin: 5% auto; display: block; max-width: 90%; max-height: 80%; }
+        .close { position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: #bbb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Solver Interface</h1>
+            <p>physics 2023 oct Paper 13</p>
+            <p>📊 40 Questions Found</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="total-questions">40</h3>
+                <p>Total Questions</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="solved-count">0</h3>
+                <p>Solved</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="flagged-count">0</h3>
+                <p>Flagged (&lt;85%)</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="avg-confidence">0%</h3>
+                <p>Avg Confidence</p>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-enhanced" onclick="getAllPrompts()">📋 Get All Prompts</button>
+            <button class="btn btn-success" onclick="exportResults()">💾 Export Results</button>
+            <button class="btn btn-primary" onclick="window.open('https://claude.ai', '_blank')">🌐 Open Claude.ai</button>
+            <button class="btn btn-secondary" onclick="showInstructions()">❓ Instructions</button>
+        </div>
+        
+        <div class="questions-grid">
+            
+            <div class="question-card" id="question-1">
+                <h3>Question 1</h3>
+                <img src="/images/physics_2023_oct_13/question_01_enhanced.png" alt="Question 1" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_01_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(1)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_01_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-1" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(1)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(1)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(1)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-1" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-2">
+                <h3>Question 2</h3>
+                <img src="/images/physics_2023_oct_13/question_02_enhanced.png" alt="Question 2" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_02_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(2)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_02_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-2" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(2)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(2)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(2)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-2" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-3">
+                <h3>Question 3</h3>
+                <img src="/images/physics_2023_oct_13/question_03_enhanced.png" alt="Question 3" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_03_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(3)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_03_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-3" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(3)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(3)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(3)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-3" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-4">
+                <h3>Question 4</h3>
+                <img src="/images/physics_2023_oct_13/question_04_enhanced.png" alt="Question 4" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_04_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(4)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_04_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-4" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(4)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(4)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(4)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-4" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-5">
+                <h3>Question 5</h3>
+                <img src="/images/physics_2023_oct_13/question_05_enhanced.png" alt="Question 5" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_05_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(5)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_05_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-5" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(5)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(5)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(5)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-5" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-6">
+                <h3>Question 6</h3>
+                <img src="/images/physics_2023_oct_13/question_06_enhanced.png" alt="Question 6" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_06_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(6)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_06_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-6" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(6)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(6)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(6)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-6" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-7">
+                <h3>Question 7</h3>
+                <img src="/images/physics_2023_oct_13/question_07_enhanced.png" alt="Question 7" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_07_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(7)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_07_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-7" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(7)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(7)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(7)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-7" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-8">
+                <h3>Question 8</h3>
+                <img src="/images/physics_2023_oct_13/question_08_enhanced.png" alt="Question 8" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_08_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(8)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_08_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-8" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(8)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(8)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(8)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-8" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-9">
+                <h3>Question 9</h3>
+                <img src="/images/physics_2023_oct_13/question_09_enhanced.png" alt="Question 9" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_09_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(9)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_09_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-9" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(9)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(9)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(9)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-9" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-10">
+                <h3>Question 10</h3>
+                <img src="/images/physics_2023_oct_13/question_10_enhanced.png" alt="Question 10" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_10_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(10)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_10_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-10" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(10)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(10)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(10)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-10" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-11">
+                <h3>Question 11</h3>
+                <img src="/images/physics_2023_oct_13/question_11_enhanced.png" alt="Question 11" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_11_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(11)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_11_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-11" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(11)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(11)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(11)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-11" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-12">
+                <h3>Question 12</h3>
+                <img src="/images/physics_2023_oct_13/question_12_enhanced.png" alt="Question 12" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_12_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(12)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_12_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-12" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(12)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(12)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(12)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-12" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-13">
+                <h3>Question 13</h3>
+                <img src="/images/physics_2023_oct_13/question_13_enhanced.png" alt="Question 13" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_13_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(13)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_13_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-13" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(13)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(13)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(13)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-13" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-14">
+                <h3>Question 14</h3>
+                <img src="/images/physics_2023_oct_13/question_14_enhanced.png" alt="Question 14" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_14_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(14)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_14_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-14" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(14)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(14)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(14)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-14" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-15">
+                <h3>Question 15</h3>
+                <img src="/images/physics_2023_oct_13/question_15_enhanced.png" alt="Question 15" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_15_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(15)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_15_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-15" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(15)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(15)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(15)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-15" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-16">
+                <h3>Question 16</h3>
+                <img src="/images/physics_2023_oct_13/question_16_enhanced.png" alt="Question 16" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_16_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(16)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_16_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-16" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(16)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(16)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(16)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-16" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-17">
+                <h3>Question 17</h3>
+                <img src="/images/physics_2023_oct_13/question_17_enhanced.png" alt="Question 17" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_17_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(17)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_17_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-17" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(17)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(17)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(17)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-17" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-18">
+                <h3>Question 18</h3>
+                <img src="/images/physics_2023_oct_13/question_18_enhanced.png" alt="Question 18" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_18_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(18)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_18_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-18" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(18)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(18)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(18)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-18" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-19">
+                <h3>Question 19</h3>
+                <img src="/images/physics_2023_oct_13/question_19_enhanced.png" alt="Question 19" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_19_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(19)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_19_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-19" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(19)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(19)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(19)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-19" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-20">
+                <h3>Question 20</h3>
+                <img src="/images/physics_2023_oct_13/question_20_enhanced.png" alt="Question 20" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_20_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(20)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_20_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-20" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(20)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(20)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(20)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-20" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-21">
+                <h3>Question 21</h3>
+                <img src="/images/physics_2023_oct_13/question_21_enhanced.png" alt="Question 21" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_21_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(21)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_21_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-21" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(21)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(21)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(21)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-21" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-22">
+                <h3>Question 22</h3>
+                <img src="/images/physics_2023_oct_13/question_22_enhanced.png" alt="Question 22" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_22_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(22)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_22_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-22" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(22)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(22)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(22)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-22" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-23">
+                <h3>Question 23</h3>
+                <img src="/images/physics_2023_oct_13/question_23_enhanced.png" alt="Question 23" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_23_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(23)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_23_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-23" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(23)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(23)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(23)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-23" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-24">
+                <h3>Question 24</h3>
+                <img src="/images/physics_2023_oct_13/question_24_enhanced.png" alt="Question 24" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_24_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(24)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_24_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-24" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(24)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(24)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(24)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-24" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-25">
+                <h3>Question 25</h3>
+                <img src="/images/physics_2023_oct_13/question_25_enhanced.png" alt="Question 25" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_25_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(25)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_25_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-25" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(25)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(25)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(25)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-25" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-26">
+                <h3>Question 26</h3>
+                <img src="/images/physics_2023_oct_13/question_26_enhanced.png" alt="Question 26" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_26_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(26)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_26_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-26" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(26)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(26)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(26)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-26" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-27">
+                <h3>Question 27</h3>
+                <img src="/images/physics_2023_oct_13/question_27_enhanced.png" alt="Question 27" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_27_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(27)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_27_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-27" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(27)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(27)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(27)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-27" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-28">
+                <h3>Question 28</h3>
+                <img src="/images/physics_2023_oct_13/question_28_enhanced.png" alt="Question 28" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_28_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(28)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_28_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-28" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(28)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(28)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(28)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-28" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-29">
+                <h3>Question 29</h3>
+                <img src="/images/physics_2023_oct_13/question_29_enhanced.png" alt="Question 29" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_29_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(29)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_29_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-29" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(29)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(29)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(29)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-29" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-30">
+                <h3>Question 30</h3>
+                <img src="/images/physics_2023_oct_13/question_30_enhanced.png" alt="Question 30" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_30_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(30)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_30_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-30" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(30)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(30)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(30)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-30" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-31">
+                <h3>Question 31</h3>
+                <img src="/images/physics_2023_oct_13/question_31_enhanced.png" alt="Question 31" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_31_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(31)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_31_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-31" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(31)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(31)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(31)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-31" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-32">
+                <h3>Question 32</h3>
+                <img src="/images/physics_2023_oct_13/question_32_enhanced.png" alt="Question 32" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_32_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(32)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_32_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-32" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(32)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(32)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(32)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-32" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-33">
+                <h3>Question 33</h3>
+                <img src="/images/physics_2023_oct_13/question_33_enhanced.png" alt="Question 33" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_33_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(33)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_33_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-33" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(33)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(33)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(33)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-33" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-34">
+                <h3>Question 34</h3>
+                <img src="/images/physics_2023_oct_13/question_34_enhanced.png" alt="Question 34" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_34_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(34)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_34_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-34" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(34)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(34)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(34)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-34" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-35">
+                <h3>Question 35</h3>
+                <img src="/images/physics_2023_oct_13/question_35_enhanced.png" alt="Question 35" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_35_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(35)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_35_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-35" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(35)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(35)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(35)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-35" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-36">
+                <h3>Question 36</h3>
+                <img src="/images/physics_2023_oct_13/question_36_enhanced.png" alt="Question 36" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_36_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(36)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_36_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-36" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(36)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(36)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(36)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-36" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-37">
+                <h3>Question 37</h3>
+                <img src="/images/physics_2023_oct_13/question_37_enhanced.png" alt="Question 37" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_37_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(37)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_37_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-37" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(37)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(37)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(37)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-37" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-38">
+                <h3>Question 38</h3>
+                <img src="/images/physics_2023_oct_13/question_38_enhanced.png" alt="Question 38" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_38_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(38)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_38_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-38" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(38)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(38)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(38)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-38" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-39">
+                <h3>Question 39</h3>
+                <img src="/images/physics_2023_oct_13/question_39_enhanced.png" alt="Question 39" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_39_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(39)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_39_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-39" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(39)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(39)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(39)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-39" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+            <div class="question-card" id="question-40">
+                <h3>Question 40</h3>
+                <img src="/images/physics_2023_oct_13/question_40_enhanced.png" alt="Question 40" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;" onclick="openFullSize('/images/physics_2023_oct_13/question_40_enhanced.png')">
+                <div style="margin-top: 1rem;">
+                    <button onclick="getPrompt(40)" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        📋 Get Prompt
+                    </button>
+                    <button onclick="window.open('/images/physics_2023_oct_13/question_40_enhanced.png', '_blank')" style="background: #6c757d; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin: 0.25rem; cursor: pointer;">
+                        🔍 Open Image
+                    </button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="font-weight: 600;">AI Response (JSON):</label>
+                    <textarea id="solution-40" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON response from Claude.ai here..." onchange="validateSolution(40)"></textarea>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="saveSolution(40)" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-right: 0.5rem; cursor: pointer;">
+                            ✅ Save
+                        </button>
+                        <button onclick="clearSolution(40)" style="background: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="solution-display-40" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;"></div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+    
+    <script>
+        const PROMPT = `Analyze this Cambridge IGCSE Physics question and provide a complete solution in JSON format.
+
+Return ONLY valid JSON in this exact structure:
+{
+  "correct_answer": "A/B/C/D or calculated value",
+  "simple_answer": "Brief clear explanation",
+  "calculation_steps": ["Step 1: Identify given values", "Step 2: Apply formula", "Step 3: Calculate result"],
+  "detailed_explanation": {
+    "why_correct": "Detailed explanation of the correct approach and physics concepts",
+    "why_others_wrong": {"A": "Why option A is incorrect", "B": "Why option B is incorrect"}
+  },
+  "topic": "Physics topic (e.g., Motion and Forces)",
+  "difficulty": "easy/medium/hard",
+  "confidence_score": 0.95
+}
+
+Important:
+- Be precise with calculations and units
+- Explain physics concepts clearly
+- For MCQ, explain why each wrong option is incorrect
+- Confidence score should be between 0.0 and 1.0`;
+
+        let solutions = {};
+        let stats = { total: 40, solved: 0, flagged: 0 };
+        
+        function getPrompt(questionNumber) {
+            navigator.clipboard.writeText(PROMPT).then(() => {
+                alert(`📋 Prompt copied for Question ${questionNumber}!\n\n1. Open Claude.ai in another tab\n2. Upload the question image\n3. Paste this prompt\n4. Copy the JSON response back here`);
+            }).catch(() => {
+                alert(`Prompt for Question ${questionNumber}:\n\n${PROMPT}`);
+            });
+        }
+        
+        function getAllPrompts() {
+            let allPrompts = "";
+            for(let i = 1; i <= stats.total; i++) {
+                allPrompts += `=== QUESTION ${i} ===\n${PROMPT}\n\n`;
+            }
+            navigator.clipboard.writeText(allPrompts).then(() => {
+                alert(`📋 All 40 prompts copied to clipboard!\n\nEach prompt is labeled with question number.`);
+            }).catch(() => {
+                console.error('Clipboard failed');
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`<pre>${allPrompts}</pre>`);
+            });
+        }
+        
+        function validateSolution(questionNumber) {
+            const textarea = document.getElementById(`solution-${questionNumber}`);
+            const solution = textarea.value.trim();
+            
+            if (!solution) {
+                textarea.style.borderColor = '#ddd';
+                return;
+            }
+            
+            try {
+                const parsed = JSON.parse(solution);
+                textarea.style.borderColor = '#28a745';
+                return parsed;
+            } catch(error) {
+                textarea.style.borderColor = '#dc3545';
+                return null;
+            }
+        }
+        
+        function saveSolution(questionNumber) {
+            const textarea = document.getElementById(`solution-${questionNumber}`);
+            const solution = textarea.value.trim();
+            
+            if(!solution) {
+                alert('❌ No solution to save');
+                return;
+            }
+            
+            try {
+                const parsed = JSON.parse(solution);
+                
+                const required = ['correct_answer', 'simple_answer', 'confidence_score'];
+                const missing = required.filter(field => !(field in parsed));
+                if (missing.length > 0) {
+                    throw new Error(`Missing required fields: ${missing.join(', ')}`);
+                }
+                
+                const confidence = parseFloat(parsed.confidence_score);
+                if (isNaN(confidence) || confidence < 0 || confidence > 1) {
+                    throw new Error('Confidence score must be between 0 and 1');
+                }
+                
+                solutions[questionNumber] = parsed;
+                displaySolution(questionNumber, parsed);
+                updateStats();
+                alert(`✅ Solution saved for Question ${questionNumber}`);
+                
+            } catch(error) {
+                alert(`❌ Invalid JSON: ${error.message}`);
+            }
+        }
+        
+        function displaySolution(questionNumber, solution) {
+            const displayDiv = document.getElementById(`solution-display-${questionNumber}`);
+            const confidence = parseFloat(solution.confidence_score);
+            const confidencePercent = Math.round(confidence * 100);
+            
+            displayDiv.innerHTML = `
+                <h5>✅ Solution Summary</h5>
+                <p><strong>Answer:</strong> ${solution.correct_answer}</p>
+                <p><strong>Explanation:</strong> ${solution.simple_answer}</p>
+                <p><strong>Topic:</strong> ${solution.topic || 'Not specified'}</p>
+                <p><strong>Confidence:</strong> ${confidencePercent}% ${confidence < 0.85 ? '⚠️ FLAGGED' : '✅'}</p>
+            `;
+            displayDiv.style.display = 'block';
+        }
+        
+        function clearSolution(questionNumber) {
+            if(confirm(`Clear solution for Question ${questionNumber}?`)) {
+                document.getElementById(`solution-${questionNumber}`).value = '';
+                document.getElementById(`solution-display-${questionNumber}`).style.display = 'none';
+                delete solutions[questionNumber];
+                updateStats();
+            }
+        }
+        
+        function updateStats() {
+            const solved = Object.keys(solutions).length;
+            const flagged = Object.values(solutions).filter(s => s.confidence_score < 0.85).length;
+            const totalConfidence = Object.values(solutions).reduce((sum, s) => sum + s.confidence_score, 0);
+            const avgConfidence = solved > 0 ? Math.round((totalConfidence / solved) * 100) : 0;
+            
+            document.getElementById('solved-count').textContent = solved;
+            document.getElementById('flagged-count').textContent = flagged;
+            document.getElementById('avg-confidence').textContent = avgConfidence + '%';
+        }
+        
+        function exportResults() {
+            if(Object.keys(solutions).length === 0) {
+                alert('❌ No solutions to export');
+                return;
+            }
+            
+            const exportData = {
+                paper_name: "physics_2023_oct_13",
+                metadata: {"app_name": "Enhanced PDF Question Extractor", "exam_paper": "Cambridge IGCSE Physics Paper 13", "exam_session": "October/November 2023", "extraction_date": "2025-08-26T08:34:10.747450", "extraction_method": "Multi-Strategy Enhanced Detection", "total_questions": 40, "extraction_tool": "Enhanced PDF Extractor v2.0", "approach": "Multi-strategy boundary detection with smart end boundaries", "web_interface_ready": true, "images_location": "/Users/wynceaxcel/Apps/axcelscore/question_banks/physics_2023_oct_13/images", "images_folder": "images", "filename": "physics_2023_oct_13.json", "standardized_naming": true, "subject": "physics", "year": "2023", "month": "oct", "month_display": "October/November", "paper_code": "13", "image_quality": 2.0, "enhancement_applied": true, "extraction_success": true, "image_replacements": [{"timestamp": "2025-08-26T08:35:35.534077", "applied_count": 3, "failed_count": 0, "replacements": [{"question_number": 1, "original_filename": "question_01_enhanced.png", "backup_filename": "question_01_enhanced_backup_20250826_083535.png", "new_file_size": 39412, "dimensions": "1108x414", "replacement_timestamp": "2025-08-26T08:35:35.496484", "active_folder": "images", "new_cache_buster": 1756168535496}, {"question_number": 3, "original_filename": "question_03_enhanced.png", "backup_filename": "question_03_enhanced_backup_20250826_083535.png", "new_file_size": 25519, "dimensions": "1062x238", "replacement_timestamp": "2025-08-26T08:35:35.518973", "active_folder": "images", "new_cache_buster": 1756168535518}, {"question_number": 4, "original_filename": "question_04_enhanced.png", "backup_filename": "question_04_enhanced_backup_20250826_083535.png", "new_file_size": 34112, "dimensions": "1076x294", "replacement_timestamp": "2025-08-26T08:35:35.533064", "active_folder": "images", "new_cache_buster": 1756168535533}], "failures": [], "active_folder": "/Users/wynceaxcel/Apps/axcelscore/question_banks/physics_2023_oct_13/images", "folder_type": "images"}]},
+                solutions: solutions,
+                statistics: {
+                    completion_rate: Math.round((Object.keys(solutions).length / stats.total) * 100),
+                    average_confidence: Object.keys(solutions).length > 0 ? 
+                        Math.round((Object.values(solutions).reduce((sum, s) => sum + s.confidence_score, 0) / Object.keys(solutions).length) * 100) : 0,
+                    flagged_count: Object.values(solutions).filter(s => s.confidence_score < 0.85).length
+                },
+                export_timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `physics_2023_oct_13_solutions_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert(`📥 Exported ${Object.keys(solutions).length} solutions to JSON file`);
+        }
+        
+        function openFullSize(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageSrc;
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        function showInstructions() {
+            alert(`🤖 AI Solver Instructions:
+
+1. 📋 GET PROMPTS:
+   • Click "Get Prompt" for individual questions
+   • Or "Get All Prompts" for batch processing
+
+2. 🌐 USE CLAUDE.AI:
+   • Open Claude.ai in another tab
+   • Upload the question image
+   • Paste the copied prompt
+   • Copy the JSON response
+
+3. 💾 SAVE SOLUTIONS:
+   • Paste JSON response in the textarea
+   • Click "Save" to validate and store
+   • Solutions auto-flagged if confidence < 85%
+
+4. 📥 EXPORT:
+   • Click "Export Results" for JSON file
+   • Contains all solutions + statistics
+
+Tips:
+• Keep this tab open while working with Claude.ai
+• Process questions in batches for efficiency
+• Review flagged solutions carefully`);
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        console.log('🤖 AI Solver Interface ready with 40 questions');
+    </script>
+</body>
+</html>

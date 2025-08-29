@@ -639,7 +639,7 @@ class EnhancedPDFExtractor:
         paper_code = question_bank["metadata"]["paper_code"]
         
         # STANDARDIZED: Main question bank directory
-        question_bank_dir = Path("/Users/wynceaxcel/Apps/axcelscore/question_banks") / f"{subject}_{year}_{month}_{paper_code}"
+        question_bank_dir = Path("/Users/wynceaxcel/Apps/axcelscore/frontend/public/question_banks") / f"{subject}_{year}_{month}_{paper_code}"
         question_bank_dir.mkdir(parents=True, exist_ok=True)
         
         try:

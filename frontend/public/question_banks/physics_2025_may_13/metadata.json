@@ -1,0 +1,55 @@
+{
+  "app_name": "Enhanced PDF Question Extractor",
+  "exam_paper": "Cambridge IGCSE Physics Paper 13",
+  "exam_session": "May/June 2025",
+  "extraction_date": "2025-08-29T16:37:15.670360",
+  "extraction_method": "Multi-Strategy Enhanced Detection",
+  "total_questions": 40,
+  "extraction_tool": "Enhanced PDF Extractor v2.0",
+  "approach": "Multi-strategy boundary detection with smart end boundaries",
+  "web_interface_ready": true,
+  "images_location": "/Users/wynceaxcel/Apps/axcelscore/frontend/public/question_banks/physics_2025_may_13/images",
+  "images_folder": "images",
+  "filename": "physics_2025_may_13.json",
+  "standardized_naming": true,
+  "subject": "physics",
+  "year": "2025",
+  "month": "may",
+  "month_display": "May/June",
+  "paper_code": "13",
+  "image_quality": 2.0,
+  "enhancement_applied": true,
+  "extraction_success": true,
+  "image_replacements": [
+    {
+      "timestamp": "2025-08-29T16:38:50.612808",
+      "applied_count": 2,
+      "failed_count": 0,
+      "replacements": [
+        {
+          "question_number": 1,
+          "original_filename": "question_01_enhanced.png",
+          "backup_filename": "question_01_enhanced_backup_20250829_163850.png",
+          "new_file_size": 23171,
+          "dimensions": "1124x218",
+          "replacement_timestamp": "2025-08-29T16:38:50.592144",
+          "active_folder": "images",
+          "new_cache_buster": 1756456730592
+        },
+        {
+          "question_number": 30,
+          "original_filename": "question_30_enhanced.png",
+          "backup_filename": "question_30_enhanced_backup_20250829_163850.png",
+          "new_file_size": 53391,
+          "dimensions": "1488x920",
+          "replacement_timestamp": "2025-08-29T16:38:50.611910",
+          "active_folder": "images",
+          "new_cache_buster": 1756456730611
+        }
+      ],
+      "failures": [],
+      "active_folder": "/Users/wynceaxcel/Apps/axcelscore/frontend/public/question_banks/physics_2025_may_13/images",
+      "folder_type": "images"
+    }
+  ]
+}

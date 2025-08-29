@@ -39,8 +39,9 @@ CORS(app)
 # Configuration - Proper separation for frontend integration
 BASE_DIR = Path("/Users/wynceaxcel/Apps/axcelscore/backend")
 TUTOR_APP_ROOT = Path("/Users/wynceaxcel/Apps/axcelscore")
+FRONTEND_PUBLIC_DIR = TUTOR_APP_ROOT / "frontend" / "public"
 UPLOAD_FOLDER = BASE_DIR / "uploads"
-QUESTION_BANKS_DIR = TUTOR_APP_ROOT / "question_banks"  # Shared with frontend
+QUESTION_BANKS_DIR = FRONTEND_PUBLIC_DIR / "question_banks"  # Shared with frontend
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 QUESTION_BANKS_DIR.mkdir(exist_ok=True)
 
