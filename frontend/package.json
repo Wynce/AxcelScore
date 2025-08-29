@@ -3,15 +3,23 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "description": "AxcelScore frontend application",
   "scripts": {
     "dev": "vite",
-    "build": "npm run copy-question-banks && vite build",
-    "build:symlink": "vite build",
-    "copy-question-banks": "echo 'Question banks already in place'",
-    "clean-question-banks": "rm -rf public/question_banks",
-    "setup-symlink": "cd public && ln -sf ../../question_banks question_banks && echo 'Symlink created successfully'",
+    "build": "npm run prepare-assets && vite build",
+    "build:local": "npm run setup-local-assets && vite build",
+    "prepare-assets": "npm run ensure-question-banks",
+    "ensure-question-banks": "mkdir -p public/question_banks && echo 'Question banks directory ready'",
+    "setup-local-assets": "npm run clean-assets && npm run setup-symlink",
+    "clean-assets": "rm -rf public/question_banks",
+    "setup-symlink": "mkdir -p public && cd public && ln -sf ../../question_banks question_banks && echo 'Symlink created successfully'",
+    "copy-question-banks": "if [ -d ../question_banks ]; then rm -rf public/question_banks && cp -r ../question_banks public/ && echo 'Question banks copied successfully'; else mkdir -p public/question_banks && echo 'Question banks directory created (source not found)'; fi",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist public/question_banks",
+    "start": "npm run preview"
   },
   "dependencies": {
     "lucide-react": "^0.263.1",
@@ -30,6 +38,23 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.11.0",
+    "typescript": "^5.6.3",
     "vite": "^5.4.10"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
