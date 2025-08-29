@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run copy-question-banks && vite build",
     "build:symlink": "vite build",
-    "copy-question-banks": "echo 'Question banks already in place at public/question_banks'",
+    "copy-question-banks": "echo 'Question banks already in place'",
     "clean-question-banks": "rm -rf public/question_banks",
     "setup-symlink": "cd public && ln -sf ../../question_banks question_banks && echo 'Symlink created successfully'",
     "lint": "eslint .",
